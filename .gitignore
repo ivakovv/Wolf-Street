@@ -1,4 +1,4 @@
-
+target/
 /target/
 !/target/classes/application.yml
 !/target/classes/application.properties
