@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -51,12 +52,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public AuthenticationResponseDto authenticate(LoginRequestDto request) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                request.username(),
-                request.password()
-        ));
-        User user = userRepository.findByUsername(request.username()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Пользователь с именем %s не найден!", request.username())));
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    request.username(),
+                    request.password()
+            ));
+        } catch (AuthenticationException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Неверное имя пользователя или пароль", e);
+        }
+        User user = userRepository.findByUsername(request.username()).orElseThrow();
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         revokeAllToken(user);
