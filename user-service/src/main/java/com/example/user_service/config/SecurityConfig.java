@@ -62,6 +62,9 @@ public class SecurityConfig {
                                 "/register",
                                 "/login",
                                 "/refresh_token").permitAll()
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(e -> {

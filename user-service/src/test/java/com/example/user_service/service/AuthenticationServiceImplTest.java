@@ -7,6 +7,8 @@ import com.example.user_service.entity.User;
 import com.example.user_service.mapper.MapperToUser;
 import com.example.user_service.repository.TokenRepository;
 import com.example.user_service.repository.UserRepository;
+import com.example.user_service.service.auth.AuthenticationServiceImpl;
+import com.example.user_service.service.auth.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

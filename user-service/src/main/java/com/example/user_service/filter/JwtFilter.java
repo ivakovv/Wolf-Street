@@ -1,6 +1,6 @@
 package com.example.user_service.filter;
 
-import com.example.user_service.service.JwtService;
+import com.example.user_service.service.auth.JwtService;
 import com.example.user_service.service.interfaces.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

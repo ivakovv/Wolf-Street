@@ -1,10 +1,12 @@
-package com.example.user_service.service;
+package com.example.user_service.service.auth;
 
 import java.util.Date;
+import java.util.List;
 import java.util.function.Function;
 
 import javax.crypto.SecretKey;
 
+import com.example.user_service.service.interfaces.UserRoleService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,7 @@ public class JwtService {
     private long accessTokenExpiration;
     @Value("${security.jwt.refresh_token_expiration}")
     private long refreshTokenExpiration;
+    private final UserRoleService userRoleService;
     private final TokenRepository tokenRepository;
 
     private SecretKey getSigningKey() {
@@ -36,8 +39,10 @@ public class JwtService {
     }
 
     private String generateToken(User user, long expiryTime) {
+        List<String> roles = userRoleService.getAllUserRoles(user);
         JwtBuilder builder = Jwts.builder()
                 .subject(user.getUsername())
+                .claim("roles", roles)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiryTime))
                 .signWith(getSigningKey());

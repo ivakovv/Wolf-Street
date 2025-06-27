@@ -1,7 +1,10 @@
-package com.example.user_service.service;
+package com.example.user_service.service.auth;
 
 import java.util.List;
 
+import com.example.user_service.enums.RoleType;
+import com.example.user_service.service.interfaces.UserRoleService;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -31,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository userRepository;
+    private final UserRoleService userRoleService;
     private final TokenRepository tokenRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
@@ -38,6 +42,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final MapperToUser mapperToUser;
 
     @Override
+    @Transactional
     public void register(RegistrationRequestDto request) {
         userRepository.findByUsername(request.username()).ifPresent(user ->{
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Пользователь с таким username уже существует");
@@ -47,7 +52,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         });
         User user = mapperToUser.mapToUser(request);
         user.setPassword(passwordEncoder.encode(request.password()));
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        userRoleService.addRoleForUser(savedUser, RoleType.TRADER);
     }
 
     @Override
