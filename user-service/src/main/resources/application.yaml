@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: user-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/user_service
+    username: postgres
+    password: 123456
+    driverClassName: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: true
+    show-sql: true
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+security:
+  jwt:
+    secret_key: dXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3M=
+    access_token_expiration: 36000000 # 10 hours
+    refresh_token_expiration: 252000000 # 7 days

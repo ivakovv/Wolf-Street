@@ -1,0 +1,45 @@
+databaseChangeLog:
+  - changeSet:
+      id: 27-06-2025-3
+      author: Dmitro0
+      comment: 'Create token table'
+      changes:
+        - createTable:
+            tableName: token
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: access_token
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: refresh_token
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_logged_out
+                  type: BOOLEAN
+                  defaultValue: false
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: token
+            baseColumnNames: user_id
+            constraintName: fk_token_user
+            referencedTableName: users
+            referencedColumnNames: id
+            onDelete: CASCADE
+            onUpdate: RESTRICT
