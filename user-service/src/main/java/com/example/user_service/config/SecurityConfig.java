@@ -24,6 +24,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.server.ResponseStatusException;
 
 @Configuration
 @EnableWebSecurity
@@ -36,7 +37,7 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден"));
     }
     @Bean
     public PasswordEncoder passwordEncoder() {
