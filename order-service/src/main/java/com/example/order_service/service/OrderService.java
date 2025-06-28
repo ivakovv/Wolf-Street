@@ -5,11 +5,14 @@ import com.example.order_service.entity.Order;
 import com.example.order_service.mapper.MapperToOrder;
 import com.example.order_service.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
 public class OrderService {
+
+    private final KafkaTemplate<String, Order> kafkaTemplate;
 
     private final OrderRepository orderRepository;
 
@@ -18,7 +21,9 @@ public class OrderService {
 
     public Order createOrder(CreateRequestDto createRequestDto){
         Order order = mapperToOrder.mapToOrder(createRequestDto);
-        return orderRepository.save(order);
+        order = orderRepository.save(order);
+        kafkaTemplate.send("Orders", "1", order);
+        return order;
     }
 
 

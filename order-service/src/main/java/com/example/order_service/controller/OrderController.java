@@ -1,4 +1,4 @@
-package com.example.order_service.controller.exception;
+package com.example.order_service.controller;
 
 import com.example.order_service.dto.CreateRequestDto;
 import com.example.order_service.service.OrderService;
