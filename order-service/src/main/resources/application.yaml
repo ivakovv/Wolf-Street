@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: order-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/order-service
+    username: postgres
+    password: 123456
+    driverClassName: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: true
+    show-sql: true
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+grpc:
+  client:
+    portfolio-service:
+      address: static://${PORTFOLIO_SERVICE_HOST:localhost}:${PORTFOLIO_SERVICE_PORT:6565}
+      enable-keep-alive: true
