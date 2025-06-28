@@ -2,8 +2,10 @@ package com.example.user_service.service.auth;
 
 import java.util.List;
 
+import com.example.user_service.dto.auth.ChangePasswordRequestDto;
 import com.example.user_service.enums.RoleType;
 import com.example.user_service.service.interfaces.UserRoleService;
+import com.example.user_service.service.interfaces.UserService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -11,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -35,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository userRepository;
     private final UserRoleService userRoleService;
+    private final UserService userService;
     private final TokenRepository tokenRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
@@ -81,9 +85,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         String token = authorizationHeader.substring(7);
-        String username = jwtService.extractUsername(token);
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Пользователь с именем %s не найден!", username)));
+        String userIdFromToken = jwtService.extractUserId(token);
+        User user = userService.loadUserById(Long.valueOf(userIdFromToken));
         if (jwtService.isValidRefresh(token, user)) {
             String accessToken = jwtService.generateAccessToken(user);
             String refreshToken = jwtService.generateRefreshToken(user);
@@ -92,6 +95,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             return new ResponseEntity<>(new AuthenticationResponseDto(accessToken, refreshToken), HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    public void changePassword(ChangePasswordRequestDto request, Authentication authentication){
+        User user = (User) authentication.getPrincipal();
+        if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неверный текущий пароль");
+        }
+        if (passwordEncoder.matches(request.newPassword(), user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Новый пароль не должен совпадать со старым");
+        }
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(user);
+
     }
 
     private void revokeAllToken(User user) {

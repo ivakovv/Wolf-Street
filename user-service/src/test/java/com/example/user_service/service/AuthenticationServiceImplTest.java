@@ -112,9 +112,7 @@ class AuthenticationServiceImplTest {
         when(userRepository.findByUsername(TEST_USERNAME)).thenReturn(Optional.of(testUser));
 
         // When
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
-            authenticationService.register(registrationRequestDto);
-        });
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> authenticationService.register(registrationRequestDto));
         //Then
         assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
         assertTrue(exception.getReason().contains("Пользователь с таким username уже существует"));

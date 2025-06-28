@@ -7,6 +7,7 @@ import java.util.function.Function;
 import javax.crypto.SecretKey;
 
 import com.example.user_service.service.interfaces.UserRoleService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class JwtService {
@@ -41,7 +43,8 @@ public class JwtService {
     private String generateToken(User user, long expiryTime) {
         List<String> roles = userRoleService.getAllUserRoles(user);
         JwtBuilder builder = Jwts.builder()
-                .subject(user.getUsername())
+                .subject(user.getId().toString())
+                .claim("name", user.getUsername())
                 .claim("roles", roles)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiryTime))
@@ -69,8 +72,10 @@ public class JwtService {
         Claims claims = extractAllClaims(token);
         return resolver.apply(claims);
     }
-
     public String extractUsername(String token) {
+        return extractClaim(token, claims -> claims.get("name", String.class));
+    }
+    public String extractUserId(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -83,19 +88,19 @@ public class JwtService {
     }
 
     public boolean isValid(String token, UserDetails user) {
-        String username = extractUsername(token);
+        String userIdFromToken = extractUserId(token);
         boolean isValidToken = tokenRepository.findByAccessToken(token)
                 .map(t -> !t.getIsLoggedOut()).orElse(false);
-        return username.equals(user.getUsername())
+        return userIdFromToken.equals(((User) user).getId().toString())
                 && isAccessTokenExpired(token)
                 && isValidToken;
     }
 
     public boolean isValidRefresh(String token, User user) {
-        String username = extractUsername(token);
+        String userIdFromToken = extractUserId(token);
         boolean isValidRefreshToken = tokenRepository.findByRefreshToken(token)
                 .map(t -> !t.getIsLoggedOut()).orElse(false);
-        return username.equals(user.getUsername())
+        return userIdFromToken.equals(user.getId().toString())
                 && isAccessTokenExpired(token)
                 && isValidRefreshToken;
     }
