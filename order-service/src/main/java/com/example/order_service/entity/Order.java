@@ -8,7 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Getter
 @Setter
@@ -18,19 +18,25 @@ public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long orderId;
+    private Long order_id;
 
     @Column(name = "user_id")
-    private Long userId;
+    private Long user_id;
 
     @Column(name = "portfolio_id")
-    private Long portfolioId;
+    private Long portfolio_id;
 
     @Column(name = "instrument_name")
     private String instrument_name;
 
     @Column(name = "count")
     private Double count;
+
+    @Column(name = "executed_count")
+    private Double executed_count;
+
+    @Column(name = "total")
+    private Double total;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
@@ -42,10 +48,10 @@ public class Order {
 
     @Column(name = "created_at")
     @CreationTimestamp
-    private LocalDateTime created_at;
+    private OffsetDateTime created_at;
 
     @Column(name = "updated_at")
     @UpdateTimestamp
-    private LocalDateTime updated_at;
+    private OffsetDateTime updated_at;
 
 }
