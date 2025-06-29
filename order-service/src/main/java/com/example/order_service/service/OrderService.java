@@ -18,11 +18,10 @@ public class OrderService {
 
     private final MapperToOrder mapperToOrder;
 
-
     public Order createOrder(CreateRequestDto createRequestDto){
         Order order = mapperToOrder.mapToOrder(createRequestDto);
         order = orderRepository.save(order);
-        kafkaTemplate.send("Orders", "1", order);
+        kafkaTemplate.send("Orders", order);
         return order;
     }
 
