@@ -1,14 +1,19 @@
 package com.example.user_service.service;
 
-import com.example.user_service.dto.auth.AuthenticationResponseDto;
-import com.example.user_service.dto.auth.LoginRequestDto;
-import com.example.user_service.dto.auth.RegistrationRequestDto;
-import com.example.user_service.entity.User;
-import com.example.user_service.mapper.MapperToUser;
-import com.example.user_service.repository.TokenRepository;
-import com.example.user_service.repository.UserRepository;
-import com.example.user_service.service.auth.AuthenticationServiceImpl;
-import com.example.user_service.service.auth.JwtService;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,17 +32,29 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.example.user_service.dto.auth.AuthenticationResponseDto;
+import com.example.user_service.dto.auth.LoginRequestDto;
+import com.example.user_service.dto.auth.RegistrationRequestDto;
+import com.example.user_service.entity.User;
+import com.example.user_service.enums.RoleType;
+import com.example.user_service.mapper.MapperToUser;
+import com.example.user_service.repository.TokenRepository;
+import com.example.user_service.repository.UserRepository;
+import com.example.user_service.service.auth.AuthenticationServiceImpl;
+import com.example.user_service.service.auth.JwtService;
+import com.example.user_service.service.interfaces.UserRoleService;
+import com.example.user_service.service.interfaces.UserService;
 
 @ExtendWith(MockitoExtension.class)
 class AuthenticationServiceImplTest {
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private UserRoleService userRoleService;
+
+    @Mock
+    private UserService userService;
 
     @Mock
     private TokenRepository tokenRepository;
@@ -104,6 +121,7 @@ class AuthenticationServiceImplTest {
         verify(userRepository).findByEmail(EMAIL);
         verify(mapperToUser).mapToUser(registrationRequestDto);
         verify(passwordEncoder).encode(PASSWORD);
+        verify(userRoleService).addRoleForUser(userToSave, RoleType.TRADER);
     }
 
     @Test
@@ -172,8 +190,8 @@ class AuthenticationServiceImplTest {
     @Test
     void refreshToken_Success() {
         //Given
-        when(jwtService.extractUsername(VALID_REFRESH_TOKEN)).thenReturn(TEST_USERNAME);
-        when(userRepository.findByUsername(TEST_USERNAME)).thenReturn(Optional.of(testUser));
+        when(jwtService.extractUserId(VALID_REFRESH_TOKEN)).thenReturn("1");
+        when(userService.loadUserById(1L)).thenReturn(testUser);
         when(jwtService.isValidRefresh(VALID_REFRESH_TOKEN, testUser)).thenReturn(true);
         when(jwtService.generateAccessToken(testUser)).thenReturn(NEW_ACCESS_TOKEN);
         when(jwtService.generateRefreshToken(testUser)).thenReturn(NEW_REFRESH_TOKEN);
@@ -207,8 +225,8 @@ class AuthenticationServiceImplTest {
     @Test
     void refreshToken_InvalidToken(){
         //Given
-        when(jwtService.extractUsername(VALID_REFRESH_TOKEN)).thenReturn(TEST_USERNAME);
-        when(userRepository.findByUsername(TEST_USERNAME)).thenReturn(Optional.of(testUser));
+        when(jwtService.extractUserId(VALID_REFRESH_TOKEN)).thenReturn("1");
+        when(userService.loadUserById(1L)).thenReturn(testUser);
         when(jwtService.isValidRefresh(VALID_REFRESH_TOKEN, testUser)).thenReturn(false);
 
         MockHttpServletRequest request = new MockHttpServletRequest();
@@ -217,6 +235,5 @@ class AuthenticationServiceImplTest {
         ResponseEntity<AuthenticationResponseDto> responseEntity = authenticationService.refreshToken(request);
         //Then
         assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
-
     }
 }

@@ -1,6 +1,5 @@
 package com.example.user_service.entity;
-
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -50,11 +49,11 @@ public class User implements UserDetails {
 
     @Column(name = "created_at")
     @CreationTimestamp
-    private LocalDateTime created_at;
+    private OffsetDateTime created_at;
 
     @Column(name = "updated_at")
     @UpdateTimestamp
-    private LocalDateTime updated_at;
+    private OffsetDateTime updated_at;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

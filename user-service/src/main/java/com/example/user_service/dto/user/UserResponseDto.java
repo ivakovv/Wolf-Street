@@ -1,12 +1,12 @@
 package com.example.user_service.dto.user;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public record UserResponseDto(String username,
                               String email,
                               String firstname,
                               String lastname,
                               String phone,
-                              LocalDateTime created_at,
-                              LocalDateTime updated_at) {
+                              OffsetDateTime created_at,
+                              OffsetDateTime updated_at) {
 }

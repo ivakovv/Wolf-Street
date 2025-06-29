@@ -1,7 +1,7 @@
 databaseChangeLog:
   - include:
-      file: classpath:/db/changelog/changeset/create-user-table.yaml
+      file: classpath:/db/changelog/changeset/create-user-table.sql
   - include:
-      file: classpath:/db/changelog/changeset/create-user-role-table.yaml
+      file: classpath:/db/changelog/changeset/create-user-role-table.sql
   - include:
-      file: classpath:/db/changelog/changeset/create-token-table.yaml
+      file: classpath:/db/changelog/changeset/create-token-table.sql
