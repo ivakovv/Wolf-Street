@@ -2,12 +2,7 @@ package com.example.user_service.service.auth;
 
 import java.util.List;
 
-import com.example.user_service.dto.auth.ChangePasswordRequestDto;
-import com.example.user_service.enums.RoleType;
-import com.example.user_service.service.interfaces.UserRoleService;
-import com.example.user_service.service.interfaces.UserService;
-import jakarta.transaction.Transactional;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,17 +15,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.example.user_service.dto.auth.AuthenticationResponseDto;
+import com.example.user_service.dto.auth.ChangePasswordRequestDto;
 import com.example.user_service.dto.auth.LoginRequestDto;
 import com.example.user_service.dto.auth.RegistrationRequestDto;
 import com.example.user_service.entity.Token;
 import com.example.user_service.entity.User;
+import com.example.user_service.enums.RoleType;
 import com.example.user_service.mapper.MapperToUser;
 import com.example.user_service.repository.TokenRepository;
 import com.example.user_service.repository.UserRepository;
 import com.example.user_service.service.interfaces.AuthenticationService;
+import com.example.user_service.service.interfaces.UserRoleService;
+import com.example.user_service.service.interfaces.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -44,9 +44,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final MapperToUser mapperToUser;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
-    @Transactional
     public void register(RegistrationRequestDto request) {
         userRepository.findByUsername(request.username()).ifPresent(user ->{
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Пользователь с таким username уже существует");
@@ -58,6 +58,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         user.setPassword(passwordEncoder.encode(request.password()));
         User savedUser = userRepository.save(user);
         userRoleService.addRoleForUser(savedUser, RoleType.TRADER);
+        eventPublisher.publishEvent(savedUser);
     }
 
     @Override
@@ -107,7 +108,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
         user.setPassword(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);
-
     }
 
     private void revokeAllToken(User user) {

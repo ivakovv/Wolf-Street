@@ -21,6 +21,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -67,6 +68,8 @@ class AuthenticationServiceImplTest {
     private AuthenticationManager authenticationManager;
     @Mock
     private MapperToUser mapperToUser;
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
     @InjectMocks
     private AuthenticationServiceImpl authenticationService;
 
@@ -122,6 +125,7 @@ class AuthenticationServiceImplTest {
         verify(mapperToUser).mapToUser(registrationRequestDto);
         verify(passwordEncoder).encode(PASSWORD);
         verify(userRoleService).addRoleForUser(userToSave, RoleType.TRADER);
+        verify(eventPublisher).publishEvent(userToSave);
     }
 
     @Test
