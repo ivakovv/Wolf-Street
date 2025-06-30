@@ -3,5 +3,3 @@ databaseChangeLog:
       file: classpath:/db/changelog/changeset/create-user-table.sql
   - include:
       file: classpath:/db/changelog/changeset/create-user-role-table.sql
-  - include:
-      file: classpath:/db/changelog/changeset/create-token-table.sql

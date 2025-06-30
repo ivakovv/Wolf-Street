@@ -9,11 +9,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +35,6 @@ import com.example.user_service.dto.auth.RegistrationRequestDto;
 import com.example.user_service.entity.User;
 import com.example.user_service.enums.RoleType;
 import com.example.user_service.mapper.MapperToUser;
-import com.example.user_service.repository.TokenRepository;
 import com.example.user_service.repository.UserRepository;
 import com.example.user_service.service.auth.AuthenticationServiceImpl;
 import com.example.user_service.service.auth.JwtService;
@@ -56,9 +51,6 @@ class AuthenticationServiceImplTest {
 
     @Mock
     private UserService userService;
-
-    @Mock
-    private TokenRepository tokenRepository;
 
     @Mock
     private JwtService jwtService;
@@ -168,7 +160,6 @@ class AuthenticationServiceImplTest {
         when(userRepository.findByUsername(testUser.getUsername())).thenReturn(Optional.of(testUser));
         when(jwtService.generateRefreshToken(testUser)).thenReturn(NEW_REFRESH_TOKEN);
         when(jwtService.generateAccessToken(testUser)).thenReturn(NEW_ACCESS_TOKEN);
-        when(tokenRepository.findAllByUserId(testUser.getId())).thenReturn(List.of());
 
         //When
         AuthenticationResponseDto response = authenticationService.authenticate(loginRequestDto);
@@ -199,7 +190,6 @@ class AuthenticationServiceImplTest {
         when(jwtService.isValidRefresh(VALID_REFRESH_TOKEN, testUser)).thenReturn(true);
         when(jwtService.generateAccessToken(testUser)).thenReturn(NEW_ACCESS_TOKEN);
         when(jwtService.generateRefreshToken(testUser)).thenReturn(NEW_REFRESH_TOKEN);
-        when(tokenRepository.findAllByUserId(testUser.getId())).thenReturn(Collections.emptyList());
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + VALID_REFRESH_TOKEN);
 

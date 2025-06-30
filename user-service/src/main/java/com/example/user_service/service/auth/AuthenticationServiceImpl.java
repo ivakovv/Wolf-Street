@@ -1,7 +1,5 @@
 package com.example.user_service.service.auth;
 
-import java.util.List;
-
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -18,11 +16,9 @@ import com.example.user_service.dto.auth.AuthenticationResponseDto;
 import com.example.user_service.dto.auth.ChangePasswordRequestDto;
 import com.example.user_service.dto.auth.LoginRequestDto;
 import com.example.user_service.dto.auth.RegistrationRequestDto;
-import com.example.user_service.entity.Token;
 import com.example.user_service.entity.User;
 import com.example.user_service.enums.RoleType;
 import com.example.user_service.mapper.MapperToUser;
-import com.example.user_service.repository.TokenRepository;
 import com.example.user_service.repository.UserRepository;
 import com.example.user_service.service.interfaces.AuthenticationService;
 import com.example.user_service.service.interfaces.UserRoleService;
@@ -39,7 +35,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository userRepository;
     private final UserRoleService userRoleService;
     private final UserService userService;
-    private final TokenRepository tokenRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
@@ -74,8 +69,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User user = userRepository.findByUsername(request.username()).orElseThrow();
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
-        revokeAllToken(user);
-        saveUserToken(accessToken, refreshToken, user);
         return new AuthenticationResponseDto(accessToken, refreshToken);
     }
 
@@ -91,8 +84,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if (jwtService.isValidRefresh(token, user)) {
             String accessToken = jwtService.generateAccessToken(user);
             String refreshToken = jwtService.generateRefreshToken(user);
-            revokeAllToken(user);
-            saveUserToken(accessToken, refreshToken, user);
             return new ResponseEntity<>(new AuthenticationResponseDto(accessToken, refreshToken), HttpStatus.OK);
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -108,23 +99,5 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
         user.setPassword(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);
-    }
-
-    private void revokeAllToken(User user) {
-        List<Token> validTokens = tokenRepository.findAllByUserId(user.getId());
-        if(!validTokens.isEmpty()){
-            validTokens.forEach(t -> t.setIsLoggedOut(true));
-        }
-        tokenRepository.saveAll(validTokens);
-    }
-
-    private void saveUserToken(String accessToken, String refreshToken, User user) {
-        Token token = Token.builder()
-                .user(user)
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .isLoggedOut(false)
-                .build();
-        tokenRepository.save(token);
     }
 }

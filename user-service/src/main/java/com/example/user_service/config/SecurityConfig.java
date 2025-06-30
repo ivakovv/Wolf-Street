@@ -11,7 +11,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,7 +21,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.server.ResponseStatusException;
 
 import com.example.user_service.filter.JwtFilter;
-import com.example.user_service.handler.CustomLogoutHandler;
 import com.example.user_service.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -33,12 +31,11 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
     private final UserRepository userRepository;
     private final JwtFilter jwtFilter;
-    private final CustomLogoutHandler customLogoutHandler;
     private final AccessDeniedHandler accessDeniedHandler;
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
     }
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -76,12 +73,6 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .logout(log -> {
-                    log.logoutUrl("/logout");
-                    log.addLogoutHandler(customLogoutHandler);
-                    log.logoutSuccessHandler((request, response, authentication) ->
-                            SecurityContextHolder.clearContext());
-                })
                 .build();
     }
 } 

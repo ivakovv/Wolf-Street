@@ -29,6 +29,7 @@
         <module>market-data-service</module>
         <module>matching-engine</module>
         <module>order-service</module>
+        <module>security-lib</module>
     </modules>
 
 </project>

@@ -6,14 +6,12 @@ import java.util.function.Function;
 
 import javax.crypto.SecretKey;
 
-import com.example.user_service.service.interfaces.UserRoleService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.example.user_service.entity.User;
-import com.example.user_service.repository.TokenRepository;
+import com.example.user_service.service.interfaces.UserRoleService;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
@@ -21,6 +19,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -33,7 +32,6 @@ public class JwtService {
     @Value("${security.jwt.refresh_token_expiration}")
     private long refreshTokenExpiration;
     private final UserRoleService userRoleService;
-    private final TokenRepository tokenRepository;
 
     private SecretKey getSigningKey() {
         byte[] keyBytes = Decoders.BASE64URL.decode(secretKey);
@@ -89,19 +87,13 @@ public class JwtService {
 
     public boolean isValid(String token, UserDetails user) {
         String userIdFromToken = extractUserId(token);
-        boolean isValidToken = tokenRepository.findByAccessToken(token)
-                .map(t -> !t.getIsLoggedOut()).orElse(false);
         return userIdFromToken.equals(((User) user).getId().toString())
-                && isAccessTokenExpired(token)
-                && isValidToken;
+                && isAccessTokenExpired(token);
     }
 
     public boolean isValidRefresh(String token, User user) {
         String userIdFromToken = extractUserId(token);
-        boolean isValidRefreshToken = tokenRepository.findByRefreshToken(token)
-                .map(t -> !t.getIsLoggedOut()).orElse(false);
         return userIdFromToken.equals(user.getId().toString())
-                && isAccessTokenExpired(token)
-                && isValidRefreshToken;
+                && isAccessTokenExpired(token);
     }
 }
