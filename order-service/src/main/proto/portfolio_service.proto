@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+service PortfolioService {
+  rpc ValidatePortfolio (PortfolioRequest) returns (PortfolioResponse);
+}
+
+message PortfolioRequest {
+  int64 portfolio_id = 1;
+  int64 user_id = 2;
+}
+
+message PortfolioResponse {
+  bool is_valid = 1;
+  string message = 2;
+}
