@@ -1,0 +1,12 @@
+syntax = "proto3";
+package com.aws.protobuf;
+option java_outer_classname = "UserMessages";
+
+message UserCreatedEvent {
+  int64 id = 1;
+  string username = 2;
+  optional string firstname = 3;
+  optional string lastname = 4;
+  string email = 5;
+  optional string phone = 6;
+}
