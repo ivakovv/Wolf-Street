@@ -1,0 +1,32 @@
+syntax = "proto3";
+package com.aws.protobuf;
+option java_outer_classname = "OrderCreateMessage";
+
+import "google/protobuf/timestamp.proto";
+
+enum OrderType {
+  BUY = 0;
+  SALE = 1;
+}
+
+enum OrderStatus {
+    NEW = 0;
+    PARTIALLY_EXECUTED = 1;
+    EXECUTED = 2;
+    PARTIALLY_CANCELLED = 3;
+    CANCELLED = 4;
+}
+
+message OrderCreatedEvent {
+  int64 order_id = 1;
+  int64 user_id = 2;
+  int64 portfolio_id = 3;
+  string instrument_name = 4;
+  double count = 5;
+  double executed_count = 6;
+  double total = 7;
+  OrderType type = 8;
+  OrderStatus status = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+}

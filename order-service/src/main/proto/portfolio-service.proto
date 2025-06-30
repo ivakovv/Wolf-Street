@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option java_package = "com.portfolio.grpc";
+option java_outer_classname = "PortfolioServiceProto";
+
+
+service Portfolio {
+    rpc isValidPortfolio (OrderRequest) returns (PortfolioResponse){}
+}
+
+message OrderRequest {
+    int64 user_id = 1;
+    int64 portfolio_id = 2;
+}
+
+message PortfolioResponse {
+    bool is_valid = 1;
+    string description = 2;
+}
