@@ -8,6 +8,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -81,7 +82,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String token = authorizationHeader.substring(7);
         String userIdFromToken = jwtService.extractUserId(token);
         User user = userService.loadUserById(Long.valueOf(userIdFromToken));
-        if (jwtService.isValidRefresh(token, user)) {
+        if (jwtService.isValidRefresh(token)) {
             String accessToken = jwtService.generateAccessToken(user);
             String refreshToken = jwtService.generateRefreshToken(user);
             return new ResponseEntity<>(new AuthenticationResponseDto(accessToken, refreshToken), HttpStatus.OK);
@@ -90,7 +91,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     public void changePassword(ChangePasswordRequestDto request, Authentication authentication){
-        User user = (User) authentication.getPrincipal();
+        User user = userService.loadUserByUsername(((UserDetails)authentication.getPrincipal()).getUsername());
         if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неверный текущий пароль");
         }

@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -29,21 +30,17 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Пользователь с id: %d не найден!", id)));
     }
-
-    public UserResponseDto getUserById(Long id){
-        User user = userRepository.findUserById(id).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Пользователь с id: %d не найден!", id)));
+    public UserResponseDto getCurrentUser(Authentication authentication){
+        User user = loadUserByUsername(getUserNameFromAuth(authentication));
         return mapperToUserResponseDto.mapToUserResponseDto(user);
     }
     public UserResponseDto updateUser(UserUpdateDto userUpdateDto, Authentication authentication){
-        User user = loadUserById(getUserIdFromAuth(authentication));
+        User user = loadUserByUsername(getUserNameFromAuth(authentication));
         mapperUpdateUser.mapUpdateUser(user, userUpdateDto);
         User savedUser = userRepository.save(user);
         return mapperToUserResponseDto.mapToUserResponseDto(savedUser);
     }
-
-    public Long getUserIdFromAuth(Authentication authentication){
-        return ((User)authentication.getPrincipal()).getId();
+    public String getUserNameFromAuth(Authentication authentication){
+        return ((UserDetails)authentication.getPrincipal()).getUsername();
     }
-
 }

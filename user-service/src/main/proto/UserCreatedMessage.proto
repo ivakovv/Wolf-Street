@@ -5,8 +5,8 @@ option java_outer_classname = "UserMessages";
 message UserCreatedEvent {
   int64 id = 1;
   string username = 2;
-  string firstname = 3;
-  string lastname = 4;
+  optional string firstname = 3;
+  optional string lastname = 4;
   string email = 5;
-  string phone = 6;
+  optional string phone = 6;
 }

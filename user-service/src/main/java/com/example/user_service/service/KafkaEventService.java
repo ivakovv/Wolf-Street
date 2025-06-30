@@ -29,11 +29,11 @@ public class KafkaEventService {
     public void handleUserRegisteredEvent(User user) {
             UserMessages.UserCreatedEvent message = UserMessages.UserCreatedEvent.newBuilder()
                     .setId(user.getId())
-                    .setUsername(user.getUsername() != null ? user.getUsername() : "")
-                    .setFirstname(user.getFirstname() != null ? user.getFirstname() : "")
-                    .setLastname(user.getLastname() != null ? user.getLastname() : "")
-                    .setEmail(user.getEmail() != null ? user.getEmail() : "")
-                    .setPhone(user.getPhone() != null ? user.getPhone() : "")
+                    .setUsername(user.getUsername())
+                    .setFirstname(user.getFirstname())
+                    .setLastname(user.getLastname())
+                    .setEmail(user.getEmail())
+                    .setPhone(user.getPhone())
                     .build();
             CompletableFuture<SendResult<String, UserMessages.UserCreatedEvent>> future = kafkaTemplate.send(userCreatedTopic, message);
             future.whenComplete((result, ex) -> {

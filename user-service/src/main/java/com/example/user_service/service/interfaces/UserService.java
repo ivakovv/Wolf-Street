@@ -8,7 +8,7 @@ import org.springframework.security.core.Authentication;
 public interface UserService {
     User loadUserByUsername(String username);
     User loadUserById(Long id);
-    Long getUserIdFromAuth(Authentication authentication);
-    UserResponseDto getUserById(Long id);
+    UserResponseDto getCurrentUser(Authentication authentication);
+    String getUserNameFromAuth(Authentication authentication);
     UserResponseDto updateUser(UserUpdateDto userUpdateDto, Authentication authentication);
 }

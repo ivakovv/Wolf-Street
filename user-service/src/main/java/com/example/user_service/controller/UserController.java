@@ -31,8 +31,8 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "Нет доступа к ресурсу!"),
             @ApiResponse(responseCode = "404", description = "Пользователь не найден!"),
     })
-    public ResponseEntity<UserResponseDto> getUserById(Authentication authentication){
-        return ResponseEntity.ok(userService.getUserById(userService.getUserIdFromAuth(authentication)));
+    public ResponseEntity<UserResponseDto> getCurrentUser(Authentication authentication){
+        return ResponseEntity.ok(userService.getCurrentUser(authentication));
     }
 
     @PutMapping("/me")
