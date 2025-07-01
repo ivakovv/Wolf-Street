@@ -22,10 +22,10 @@ message OrderCreatedEvent {
   int64 user_id = 2;
   int64 portfolio_id = 3;
   string instrument_name = 4;
-  double piece_price = 5;
-  double count = 6;
-  double executed_count = 7;
-  double total = 8;
+  string piece_price = 5;
+  int64 count = 6;
+  int64 executed_count = 7;
+  string total = 8;
   OrderType type = 9;
   OrderStatus status = 10;
   google.protobuf.Timestamp created_at = 11;

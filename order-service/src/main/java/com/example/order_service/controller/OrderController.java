@@ -52,4 +52,8 @@ public class OrderController {
     public ResponseEntity<String> test(){
         return ResponseEntity.ok().body("");
     }
+    @PatchMapping("/{order_id}/cancelled")
+    public ResponseEntity<OrderStatusResponseDto> cancelledOrder(@PathVariable(value="order_id") Long order_id){
+        return ResponseEntity.ok().body(orderService.cancelledOrder(order_id));
+    }
 }

@@ -88,15 +88,16 @@ public class OrderService {
 
     private void sendProtoMessageToKafka(Order order) {
         try {
-            OrderCreateMessage.OrderCreatedEvent message = OrderCreateMessage.OrderCreatedEvent.newBuilder()
+            OrderCreateMessage.OrderCreatedEvent message = OrderCreateMessage.OrderCreatedEvent
+                    .newBuilder()
                     .setOrderId(order.getOrder_id())
                     .setUserId(order.getUser_id())
                     .setPortfolioId(order.getPortfolio_id())
                     .setInstrumentName(order.getInstrument_name())
-                    .setPiecePrice(order.getPiece_price())
+                    .setPiecePrice((order.getPiece_price().toString()))
                     .setCount(order.getCount())
                     .setExecutedCount(order.getExecuted_count())
-                    .setTotal(order.getTotal())
+                    .setTotal(order.getTotal().toString())
                     .setType(order.getType().getProtoType())
                     .setStatus(order.getStatus().getProtoStatus())
                     .setCreatedAt(Timestamp.newBuilder()

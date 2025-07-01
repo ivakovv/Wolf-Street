@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 @Getter
@@ -30,16 +31,16 @@ public class Order {
     private String instrument_name;
 
     @Column(name = "count")
-    private Double count;
+    private Long count;
 
     @Column(name = "piece_price")
-    private Double piece_price;
+    private BigDecimal piece_price;
 
     @Column(name = "executed_count")
-    private Double executed_count;
+    private Long executed_count;
 
     @Column(name = "total")
-    private Double total;
+    private BigDecimal total;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
