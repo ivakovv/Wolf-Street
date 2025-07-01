@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: classpath:/db/changelog/changeset/create-portfolio-table.sql
+  - include:
+      file: classpath:/db/changelog/changeset/create-portfolio-cash-table.sql
+  - include:
+      file: classpath:/db/changelog/changeset/create-portfolio-instruments-table.sql
