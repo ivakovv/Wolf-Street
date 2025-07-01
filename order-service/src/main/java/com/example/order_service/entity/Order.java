@@ -32,6 +32,9 @@ public class Order {
     @Column(name = "count")
     private Double count;
 
+    @Column(name = "piece_price")
+    private Double piece_price;
+
     @Column(name = "executed_count")
     private Double executed_count;
 

@@ -2,18 +2,25 @@ package com.example.order_service.service;
 
 import com.aws.protobuf.OrderCreateMessage;
 import com.example.order_service.dto.CreateRequestDto;
+import com.example.order_service.dto.OrderStatusResponseDto;
 import com.example.order_service.entity.Order;
+import com.example.order_service.enums.OrderStatus;
 import com.example.order_service.mapper.MapperToOrder;
 import com.example.order_service.repository.OrderRepository;
 import com.example.order_service.service.proto.PortfolioServiceClient;
 import com.google.protobuf.Timestamp;
 import com.portfolio.grpc.PortfolioServiceProto;
+import com.wolfstreet.security_lib.details.JwtDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -28,12 +35,13 @@ public class OrderService {
 
     private final PortfolioServiceClient portfolioServiceClient;
 
-    public Order createOrder(CreateRequestDto createRequestDto) {
+    public Order createOrder(Authentication authentication, CreateRequestDto createRequestDto) {
 
-        //TO DO: Добавить проверку авторизации пользователя через токен
+        JwtDetails jwtDetails = (JwtDetails)authentication.getPrincipal();
+
         try {
             PortfolioServiceProto.PortfolioResponse isValidPortfolio = portfolioServiceClient.isPortfolioValid(
-                    createRequestDto.user_id(),
+                    jwtDetails.getUserId(),
                     createRequestDto.portfolio_id()
             );
 
@@ -47,15 +55,45 @@ public class OrderService {
                     "Не удалось проверить портфолио. Попробуйте позже");
         }
 
-        Order order = mapperToOrder.mapToOrder(createRequestDto);
+        Order order = mapperToOrder.mapToOrder(jwtDetails.getUserId(), createRequestDto);
         order = orderRepository.save(order);
 
+        sendProtoMessageToKafka(order);
+
+        return order;
+    }
+
+    public List<Order> getAllOrdersForUser(Authentication authentication){
+        JwtDetails jwtDetails = (JwtDetails)authentication.getPrincipal();
+        return orderRepository.findByUserId(jwtDetails.getUserId());
+    }
+
+    public Order getOrderById(Long order_id){
+        return orderRepository.findById(order_id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                String.format("Заявка с id: %d не найдена", order_id)));
+    }
+
+    public OrderStatusResponseDto cancelledOrder(Long order_id) {
+        Order order = orderRepository.findById(order_id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                String.format("Заявка с id: %d не найдена", order_id)));
+        if (Objects.equals(order.getExecuted_count(), order.getCount()) || order.getExecuted_count() == 0)
+            order.setStatus(OrderStatus.CANCELLED);
+        else
+            order.setStatus(OrderStatus.PARTIALLY_CANCELLED);
+
+        Order savedOrder = orderRepository.save(order);
+        sendProtoMessageToKafka(order);
+        return new OrderStatusResponseDto(savedOrder.getStatus());
+    }
+
+    private void sendProtoMessageToKafka(Order order) {
         try {
             OrderCreateMessage.OrderCreatedEvent message = OrderCreateMessage.OrderCreatedEvent.newBuilder()
                     .setOrderId(order.getOrder_id())
                     .setUserId(order.getUser_id())
                     .setPortfolioId(order.getPortfolio_id())
                     .setInstrumentName(order.getInstrument_name())
+                    .setPiecePrice(order.getPiece_price())
                     .setCount(order.getCount())
                     .setExecutedCount(order.getExecuted_count())
                     .setTotal(order.getTotal())
@@ -72,12 +110,7 @@ public class OrderService {
                     .build();
             kafkaTemplate.send("Orders", message);
         } catch (Exception e) {
-            log.error("Не удалось отправить в Kafka сообщение" + e.getMessage());
+            log.error("Не удалось отправить в Kafka сообщение " + e.getMessage());
         }
-        return order;
     }
-//    public List<Order> getAllOrdersForUser(){
-//        //TO DO получение токена, получение из токена user_id
-//    }
-
 }

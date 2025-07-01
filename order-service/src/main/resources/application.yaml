@@ -31,3 +31,7 @@ grpc:
       address: static://localhost:6565
       enable-keep-alive: true
       negotiation-type: plaintext
+
+security:
+  jwt:
+    secret_key: dXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3M=

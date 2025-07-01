@@ -18,7 +18,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <java.version>22</java.version>
+        <java.version>20</java.version>
     </properties>
 
     <modules>
@@ -29,6 +29,7 @@
         <module>market-data-service</module>
         <module>matching-engine</module>
         <module>order-service</module>
+        <module>security-lib</module>
     </modules>
 
 </project>

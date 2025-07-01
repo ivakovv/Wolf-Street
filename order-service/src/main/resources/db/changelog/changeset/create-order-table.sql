@@ -3,6 +3,7 @@ CREATE TABLE orders (
     user_id BIGINT NOT NULL,
     portfolio_id BIGINT NOT NULL,
     instrument_name VARCHAR(255) NOT NULL,
+    piece_price DOUBLE PRECISION NOT NULL,
     count DOUBLE PRECISION NOT NULL,
     executed_count DOUBLE PRECISION NOT NULL,
     total DOUBLE PRECISION NOT NULL,
