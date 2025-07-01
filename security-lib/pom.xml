@@ -12,7 +12,7 @@
     <artifactId>security-lib</artifactId>
 
     <properties>
-        <jjwt.version>0.12.5</jjwt.version>
+        <jjwt.version>0.12.6</jjwt.version>
     </properties>
 
     <dependencies>
@@ -25,7 +25,7 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- JJWT for JWT handling -->
+        <!-- JWT -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
@@ -49,5 +49,11 @@
             <optional>true</optional>
         </dependency>
     </dependencies>
-
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/ivakovv/Wolf-Street</url>
+        </repository>
+    </distributionManagement>
 </project>
