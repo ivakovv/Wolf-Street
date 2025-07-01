@@ -6,7 +6,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"com.example.portfolio_service", "com.wolfstreet.security_lib"})
+@ComponentScan(basePackages = {"com.example.order_service", "com.wolfstreet.security_lib"})
 public class OrderServiceApplication {
 
     public static void main(String[] args) {

@@ -9,7 +9,7 @@ import com.example.order_service.mapper.MapperToOrder;
 import com.example.order_service.repository.OrderRepository;
 import com.example.order_service.service.proto.PortfolioServiceClient;
 import com.google.protobuf.Timestamp;
-import com.portfolio.grpc.PortfolioServiceProto;
+import com.aws.protobuf.PortfolioServiceProto;
 import com.wolfstreet.security_lib.details.JwtDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,21 +39,21 @@ public class OrderService {
 
         JwtDetails jwtDetails = (JwtDetails)authentication.getPrincipal();
 
-        try {
-            PortfolioServiceProto.PortfolioResponse isValidPortfolio = portfolioServiceClient.isPortfolioValid(
-                    jwtDetails.getUserId(),
-                    createRequestDto.portfolio_id()
-            );
-
-            if (!isValidPortfolio.getIsValid()) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                        isValidPortfolio.getDescription());
-            }
-
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
-                    "Не удалось проверить портфолио. Попробуйте позже");
-        }
+//        try {
+//            PortfolioServiceProto.PortfolioResponse isValidPortfolio = portfolioServiceClient.isPortfolioValid(
+//                    jwtDetails.getUserId(),
+//                    createRequestDto.portfolio_id()
+//            );
+//
+//            if (!isValidPortfolio.getIsValid()) {
+//                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+//                        isValidPortfolio.getDescription());
+//            }
+//
+//        } catch (Exception e) {
+//            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+//                    "Не удалось проверить портфолио. Попробуйте позже");
+//        }
 
         Order order = mapperToOrder.mapToOrder(jwtDetails.getUserId(), createRequestDto);
         order = orderRepository.save(order);

@@ -30,16 +30,6 @@ public class OrderController {
         return ResponseEntity.ok().body(orderService.createOrder(authentication, orderCreateDto));
     }
 
-    @PatchMapping("/{order_id}/cancelled")
-    public ResponseEntity<OrderStatusResponseDto> cancelledOrder(@PathVariable(value="order_id") Long order_id){
-        return ResponseEntity.ok().body(orderService.cancelledOrder(order_id));
-    }
-
-    @PatchMapping("/{id}")
-    public ResponseEntity<String> updateOrder(){
-        return ResponseEntity.ok().body("...");
-    }
-
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Заявки найдены"),
             @ApiResponse(responseCode = "403", description = "Пользователь не авторизован"),
@@ -57,5 +47,9 @@ public class OrderController {
     @GetMapping("/{order_id}")
     public ResponseEntity<Order> getAllOrdersById(@PathVariable(value="order_id") Long order_id){
         return ResponseEntity.ok().body(orderService.getOrderById(order_id));
+    }
+    @GetMapping("/test")
+    public ResponseEntity<String> test(){
+        return ResponseEntity.ok().body("");
     }
 }

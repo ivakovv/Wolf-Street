@@ -1,7 +1,7 @@
 package com.example.order_service.service.proto;
 
-import com.portfolio.grpc.PortfolioGrpc;
-import com.portfolio.grpc.PortfolioServiceProto;
+import com.aws.protobuf.PortfolioGrpc;
+import com.aws.protobuf.PortfolioServiceProto;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Service;
 
