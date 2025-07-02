@@ -2,12 +2,12 @@ package com.example.order_service.dto;
 
 import com.example.order_service.enums.OrderType;
 
+import java.math.BigDecimal;
+
 public record CreateRequestDto(
-        Long portfolio_id,
-        Double total,
-        Double executed_count,
-        String instrument_name,
-        Double piece_price,
-        Double count,
+        Long portfolioId,
+        BigDecimal lotPrice,
+        Long instrumentId,
+        Long count,
         OrderType type) {
 }

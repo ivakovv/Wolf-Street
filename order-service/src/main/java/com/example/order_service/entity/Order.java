@@ -14,48 +14,48 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name="orders")
+@Table(name = "orders")
 public class Order {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long order_id;
+    @Column(name = "order_id")
+    private Long orderId;
 
-    @Column(name = "user_id")
-    private Long user_id;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
-    @Column(name = "portfolio_id")
-    private Long portfolio_id;
+    @Column(name = "portfolio_id", nullable = false)
+    private Long portfolioId;
 
-    @Column(name = "instrument_name")
-    private String instrument_name;
+    @Column(name = "instrument_id", nullable = false)
+    private Long instrumentId;
 
-    @Column(name = "count")
+    @Column(nullable = false)
     private Long count;
 
-    @Column(name = "piece_price")
-    private BigDecimal piece_price;
-
     @Column(name = "executed_count")
-    private Long executed_count;
+    private Long executedCount = 0L;
 
-    @Column(name = "total")
-    private BigDecimal total;
+    @Column(name = "lot_price", precision = 18, scale = 4)
+    private BigDecimal lotPrice;
+
+    @Column(name = "executed_total", precision = 18, scale = 4)
+    private BigDecimal executedTotal = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "type")
+    @Column(name = "type", nullable = false)
     private OrderType type;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    private OrderStatus status;
+    @Column(name = "status", nullable = false)
+    private OrderStatus status = OrderStatus.NEW;
 
-    @Column(name = "created_at")
     @CreationTimestamp
-    private OffsetDateTime created_at;
+    @Column(name = "created_at", updatable = false)
+    private OffsetDateTime createdAt;
 
-    @Column(name = "updated_at")
     @UpdateTimestamp
-    private OffsetDateTime updated_at;
+    @Column(name = "updated_at")
+    private OffsetDateTime updatedAt;
 
 }

@@ -21,13 +21,10 @@ message OrderCreatedEvent {
   int64 order_id = 1;
   int64 user_id = 2;
   int64 portfolio_id = 3;
-  string instrument_name = 4;
-  string piece_price = 5;
-  int64 count = 6;
-  int64 executed_count = 7;
-  string total = 8;
-  OrderType type = 9;
-  OrderStatus status = 10;
-  google.protobuf.Timestamp created_at = 11;
-  google.protobuf.Timestamp updated_at = 12;
+  int64 instrument_id = 4;
+  int64 count = 5;
+  string lotPrice = 6;
+  OrderType type = 7;
+  OrderStatus status = 8;
+  google.protobuf.Timestamp created_at = 9;
 }

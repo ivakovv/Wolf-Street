@@ -42,7 +42,7 @@ public class OrderService {
 //        try {
 //            PortfolioServiceProto.PortfolioResponse isValidPortfolio = portfolioServiceClient.isPortfolioValid(
 //                    jwtDetails.getUserId(),
-//                    createRequestDto.portfolio_id()
+//                    createRequestDto
 //            );
 //
 //            if (!isValidPortfolio.getIsValid()) {
@@ -68,21 +68,21 @@ public class OrderService {
         return orderRepository.findByUserId(jwtDetails.getUserId());
     }
 
-    public Order getOrderById(Long order_id){
-        return orderRepository.findById(order_id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                String.format("Заявка с id: %d не найдена", order_id)));
+    public Order getOrderById(Long orderId){
+        return orderRepository.findById(orderId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                String.format("Заявка с id: %d не найдена", orderId)));
     }
 
-    public OrderStatusResponseDto cancelledOrder(Long order_id) {
-        Order order = orderRepository.findById(order_id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                String.format("Заявка с id: %d не найдена", order_id)));
-        if (Objects.equals(order.getExecuted_count(), order.getCount()) || order.getExecuted_count() == 0)
+    public OrderStatusResponseDto cancelledOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                String.format("Заявка с id: %d не найдена", orderId)));
+        if (Objects.equals(order.getExecutedCount(), order.getCount()) || order.getExecutedCount() == 0)
             order.setStatus(OrderStatus.CANCELLED);
         else
             order.setStatus(OrderStatus.PARTIALLY_CANCELLED);
 
         Order savedOrder = orderRepository.save(order);
-        sendProtoMessageToKafka(order);
+        sendProtoMessageToKafka(savedOrder);
         return new OrderStatusResponseDto(savedOrder.getStatus());
     }
 
@@ -90,23 +90,17 @@ public class OrderService {
         try {
             OrderCreateMessage.OrderCreatedEvent message = OrderCreateMessage.OrderCreatedEvent
                     .newBuilder()
-                    .setOrderId(order.getOrder_id())
-                    .setUserId(order.getUser_id())
-                    .setPortfolioId(order.getPortfolio_id())
-                    .setInstrumentName(order.getInstrument_name())
-                    .setPiecePrice((order.getPiece_price().toString()))
+                    .setOrderId(order.getOrderId())
+                    .setUserId(order.getUserId())
+                    .setPortfolioId(order.getPortfolioId())
+                    .setInstrumentId(order.getInstrumentId())
                     .setCount(order.getCount())
-                    .setExecutedCount(order.getExecuted_count())
-                    .setTotal(order.getTotal().toString())
+                    .setLotPrice(order.getLotPrice().toString())
                     .setType(order.getType().getProtoType())
                     .setStatus(order.getStatus().getProtoStatus())
                     .setCreatedAt(Timestamp.newBuilder()
-                            .setSeconds(order.getCreated_at().toEpochSecond())
-                            .setNanos(order.getCreated_at().getNano())
-                            .build())
-                    .setUpdatedAt(Timestamp.newBuilder()
-                            .setSeconds(order.getUpdated_at().toEpochSecond())
-                            .setNanos(order.getUpdated_at().getNano())
+                            .setSeconds(order.getCreatedAt().toEpochSecond())
+                            .setNanos(order.getCreatedAt().getNano())
                             .build())
                     .build();
             kafkaTemplate.send("Orders", message);
