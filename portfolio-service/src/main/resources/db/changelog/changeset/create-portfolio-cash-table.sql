@@ -4,6 +4,5 @@ CREATE TABLE portfolio_cash (
     currency VARCHAR(10) NOT NULL DEFAULT 'RUB',
     available_amount DECIMAL(18,2) NOT NULL DEFAULT 0,
     blocked_amount DECIMAL(18,2) NOT NULL DEFAULT 0,
-    total_amount DECIMAL(18,2) NOT NULL DEFAULT 0,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

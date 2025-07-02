@@ -1,8 +1,11 @@
 package com.example.portfolio_service.entity;
 
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.UpdateTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -14,9 +17,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "portfolio_instruments")
@@ -42,9 +42,6 @@ public class PortfolioInstruments {
 
     @Column(name = "blocked_amount")
     private Long blockedAmount = 0L;
-
-    @Column(name = "total_amount")
-    private Long totalAmount = 0L;
 
     @UpdateTimestamp
     @Column(name = "updated_at")

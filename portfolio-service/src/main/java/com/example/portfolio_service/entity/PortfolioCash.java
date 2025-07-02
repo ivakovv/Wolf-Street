@@ -2,7 +2,6 @@ package com.example.portfolio_service.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -43,9 +42,6 @@ public class PortfolioCash {
 
     @Column(name = "blocked_amount")
     private BigDecimal blockedAmount = BigDecimal.ZERO;
-
-    @Column(name = "total_amount")
-    private BigDecimal totalAmount = BigDecimal.ZERO;
 
     @UpdateTimestamp
     @Column(name = "updated_at")
