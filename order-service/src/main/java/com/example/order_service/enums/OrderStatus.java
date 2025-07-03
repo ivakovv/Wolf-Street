@@ -1,33 +1,33 @@
 package com.example.order_service.enums;
 
-import com.aws.protobuf.OrderCreateMessage;
+import com.aws.protobuf.OrderMessages;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public enum OrderStatus {
-    NEW(OrderCreateMessage.OrderStatus.NEW),
-    PARTIALLY_EXECUTED(OrderCreateMessage.OrderStatus.PARTIALLY_EXECUTED),
-    EXECUTED(OrderCreateMessage.OrderStatus.EXECUTED),
-    PARTIALLY_CANCELLED(OrderCreateMessage.OrderStatus.PARTIALLY_CANCELLED),
-    CANCELLED(OrderCreateMessage.OrderStatus.CANCELLED);
+    NEW(OrderMessages.OrderStatus.NEW),
+    PARTIALLY_EXECUTED(OrderMessages.OrderStatus.PARTIALLY_EXECUTED),
+    EXECUTED(OrderMessages.OrderStatus.EXECUTED),
+    PARTIALLY_CANCELLED(OrderMessages.OrderStatus.PARTIALLY_CANCELLED),
+    CANCELLED(OrderMessages.OrderStatus.CANCELLED);
 
-    private final OrderCreateMessage.OrderStatus protoStatus;
+    private final OrderMessages.OrderStatus protoStatus;
 
-    private static final Map<OrderCreateMessage.OrderStatus, OrderStatus> PROTO_TO_JAVA =
+    private static final Map<OrderMessages.OrderStatus, OrderStatus> PROTO_TO_JAVA =
             Arrays.stream(values())
                     .collect(Collectors.toMap(OrderStatus::getProtoStatus, Function.identity()));
 
-    OrderStatus(OrderCreateMessage.OrderStatus protoStatus) {
+    OrderStatus(OrderMessages.OrderStatus protoStatus) {
         this.protoStatus = protoStatus;
     }
 
-    public OrderCreateMessage.OrderStatus getProtoStatus() {
+    public OrderMessages.OrderStatus getProtoStatus() {
         return protoStatus;
     }
 
-    public static OrderStatus fromProto(OrderCreateMessage.OrderStatus protoStatus) {
+    public static OrderStatus fromProto(OrderMessages.OrderStatus protoStatus) {
         return PROTO_TO_JAVA.get(protoStatus);
     }
 }
