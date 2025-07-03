@@ -1,12 +1,15 @@
 package com.example.portfolio_service.service;
 
 import com.example.portfolio_service.entity.Portfolio;
+import com.example.portfolio_service.entity.PortfolioCash;
+import com.example.portfolio_service.entity.PortfolioInstruments;
 import com.example.portfolio_service.repository.PortfolioCashRepository;
 import com.example.portfolio_service.repository.PortfolioInstrumentsRepository;
 import com.example.portfolio_service.repository.PortfolioRepository;
 import com.example.portfolio_service.service.interfaces.PortfolioValidationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -19,16 +22,36 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
     private final PortfolioCashRepository portfolioCashRepository;
 
     @Override
-    public boolean isValidForSale(Long userId, Long portfolioId, Long instrumentId, Long count) {
+    public boolean validateAndBlockForSale(Long userId, Long portfolioId, Long instrumentId, Long count) {
         return getUserPortfolio(userId, portfolioId)
-                .map(portfolio -> hasInstrumentForSale(portfolio, instrumentId, count))
+                .flatMap(portfolio -> findInstrument(portfolio, instrumentId))
+                .map(instrument -> blockInstruments(instrument, count))
                 .orElse(false);
     }
 
     @Override
-    public boolean isValidForBuy(Long userId, Long portfolioId, BigDecimal total) {
+    public boolean validateAndBlockForBuy(Long userId, Long portfolioId, String total) {
         return getUserPortfolio(userId, portfolioId)
-                .map(portfolio -> hasCashForBuy(portfolio, total))
+                .flatMap(this::findCash)
+                .map(cash -> blockCash(cash, new BigDecimal(total)))
+                .orElse(false);
+    }
+
+    @Override
+    @Transactional
+    public boolean unblockInstruments(Long userId, Long portfolioId, Long instrumentId, Long count) {
+        return getUserPortfolio(userId, portfolioId)
+                .flatMap(portfolio -> findInstrument(portfolio, instrumentId))
+                .map(instrument -> releaseInstruments(instrument, count))
+                .orElse(false);
+    }
+
+    @Override
+    @Transactional
+    public boolean unblockCash(Long userId, Long portfolioId, BigDecimal amount) {
+        return getUserPortfolio(userId, portfolioId)
+                .flatMap(this::findCash)
+                .map(cash -> releaseCash(cash, amount))
                 .orElse(false);
     }
 
@@ -37,20 +60,53 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
                 .filter(portfolio -> portfolio.getUserId().equals(userId));
     }
 
-    private boolean hasInstrumentForSale(Portfolio portfolio, Long instrumentId, Long count) {
-        return portfolioInstrumentsRepository
-                .findByPortfolioAndInstrumentId(portfolio, instrumentId)
-                .map(instrument -> instrument.getAvailableAmount() >= count)
-                .orElse(false);
+    private Optional<PortfolioInstruments> findInstrument(Portfolio portfolio, Long instrumentId) {
+        return portfolioInstrumentsRepository.findByPortfolioAndInstrumentId(portfolio, instrumentId);
     }
 
-    private boolean hasCashForBuy(Portfolio portfolio, BigDecimal total){
-        return portfolioCashRepository
-                .findByPortfolioAndCurrency(portfolio, "RUB")
-                .map(cash -> cash.getAvailableAmount().compareTo(total) >= 0)
-                .orElse(false);
+    private Optional<PortfolioCash> findCash(Portfolio portfolio) {
+        return portfolioCashRepository.findByPortfolioAndCurrency(portfolio, "RUB");
     }
 
+    private boolean blockInstruments(PortfolioInstruments instrument, Long count) {
+        if (instrument.getAvailableAmount() < count) {
+            return false;
+        }
+        instrument.setAvailableAmount(instrument.getAvailableAmount() - count);
+        instrument.setBlockedAmount(instrument.getBlockedAmount() + count);
+        portfolioInstrumentsRepository.save(instrument);
+        return true;
+    }
+
+    private boolean blockCash(PortfolioCash cash, BigDecimal amount) {
+        if (cash.getAvailableAmount().compareTo(amount) < 0) {
+            return false;
+        }
+        cash.setAvailableAmount(cash.getAvailableAmount().subtract(amount));
+        cash.setBlockedAmount(cash.getBlockedAmount().add(amount));
+        portfolioCashRepository.save(cash);
+        return true;
+    }
+
+    private boolean releaseInstruments(PortfolioInstruments instrument, Long count) {
+        if (instrument.getBlockedAmount() < count) {
+            return false;
+        }
+        instrument.setAvailableAmount(instrument.getAvailableAmount() + count);
+        instrument.setBlockedAmount(instrument.getBlockedAmount() - count);
+        portfolioInstrumentsRepository.save(instrument);
+        return true;
+    }
+
+    private boolean releaseCash(PortfolioCash cash, BigDecimal amount) {
+        if (cash.getBlockedAmount().compareTo(amount) < 0) {
+            return false;
+        }
+        cash.setAvailableAmount(cash.getAvailableAmount().add(amount));
+        cash.setBlockedAmount(cash.getBlockedAmount().subtract(amount));
+        portfolioCashRepository.save(cash);
+        return true;
+    }
 }
 
 

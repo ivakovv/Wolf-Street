@@ -26,6 +26,9 @@ spring:
         transaction.state.log.min.isr: 1
     topic:
       user-created: user-created
+grpc:
+  server:
+    port: 6565
 security:
   jwt:
     secret_key: dXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3M=
