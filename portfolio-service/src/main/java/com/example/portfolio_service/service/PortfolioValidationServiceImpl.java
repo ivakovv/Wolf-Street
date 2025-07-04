@@ -8,12 +8,14 @@ import com.example.portfolio_service.repository.PortfolioInstrumentsRepository;
 import com.example.portfolio_service.repository.PortfolioRepository;
 import com.example.portfolio_service.service.interfaces.PortfolioValidationService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PortfolioValidationServiceImpl implements PortfolioValidationService {
@@ -23,7 +25,7 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
 
     @Override
     public boolean validateAndBlockForSale(Long userId, Long portfolioId, Long instrumentId, Long count) {
-        return getUserPortfolio(userId, portfolioId)
+        return findUserPortfolio(userId, portfolioId)
                 .flatMap(portfolio -> findInstrument(portfolio, instrumentId))
                 .map(instrument -> blockInstruments(instrument, count))
                 .orElse(false);
@@ -31,7 +33,7 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
 
     @Override
     public boolean validateAndBlockForBuy(Long userId, Long portfolioId, String total) {
-        return getUserPortfolio(userId, portfolioId)
+        return findUserPortfolio(userId, portfolioId)
                 .flatMap(this::findCash)
                 .map(cash -> blockCash(cash, new BigDecimal(total)))
                 .orElse(false);
@@ -40,7 +42,7 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
     @Override
     @Transactional
     public boolean unblockInstruments(Long userId, Long portfolioId, Long instrumentId, Long count) {
-        return getUserPortfolio(userId, portfolioId)
+        return findUserPortfolio(userId, portfolioId)
                 .flatMap(portfolio -> findInstrument(portfolio, instrumentId))
                 .map(instrument -> releaseInstruments(instrument, count))
                 .orElse(false);
@@ -49,13 +51,37 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
     @Override
     @Transactional
     public boolean unblockCash(Long userId, Long portfolioId, BigDecimal amount) {
-        return getUserPortfolio(userId, portfolioId)
+        return findUserPortfolio(userId, portfolioId)
                 .flatMap(this::findCash)
                 .map(cash -> releaseCash(cash, amount))
                 .orElse(false);
     }
 
-    private Optional<Portfolio> getUserPortfolio(Long userId, Long portfolioId) {
+    @Override
+    @Transactional
+    public void processDeal(
+            Long buyUserId, Long saleUserId, Long portfolioBuyId, Long portfolioSaleId, Long instrumentId, Long count, BigDecimal lotPrice) {
+        try {
+            processDealForSaleSide(saleUserId, portfolioSaleId, instrumentId, count, lotPrice);
+            processDealForBuySide(buyUserId, portfolioBuyId, instrumentId, count, lotPrice);
+        } catch (IllegalArgumentException e) {
+            log.error("processDeal failed: {}", e.getMessage());
+        }
+    }
+
+    private void processDealForSaleSide(Long saleUserId, Long portfolioSaleId, Long instrumentId, Long count, BigDecimal lotPrice) {
+        Portfolio portfolio = getUserPortfolio(saleUserId, portfolioSaleId);
+        updateAvailableCash(portfolio, lotPrice.multiply(new BigDecimal(count)));
+        updateBlockedInstrument(portfolio, instrumentId, -count);
+    }
+
+    private void processDealForBuySide(Long buyUserId, Long portfolioBuyId, Long instrumentId, Long count, BigDecimal lotPrice) {
+        Portfolio portfolio = getUserPortfolio(buyUserId, portfolioBuyId);
+        updateBlockedCash(portfolio, lotPrice.multiply(new BigDecimal(count)).negate());
+        updateAvailableInstrument(portfolio, instrumentId, count);
+    }
+
+    private Optional<Portfolio> findUserPortfolio(Long userId, Long portfolioId) {
         return portfolioRepository.findById(portfolioId)
                 .filter(portfolio -> portfolio.getUserId().equals(userId));
     }
@@ -66,6 +92,21 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
 
     private Optional<PortfolioCash> findCash(Portfolio portfolio) {
         return portfolioCashRepository.findByPortfolioAndCurrency(portfolio, "RUB");
+    }
+
+    private Portfolio getUserPortfolio(Long userId, Long portfolioId) {
+        return findUserPortfolio(userId, portfolioId).orElseThrow(
+                () -> new IllegalArgumentException(String.format("Portfolio %d for user %d doesn't exists", portfolioId, userId)));
+    }
+
+    private PortfolioInstruments getInstrument(Portfolio portfolio, Long instrumentId) {
+        return findInstrument(portfolio, instrumentId).orElseThrow(
+                () -> new IllegalArgumentException(String.format("Instrument: %d in portfolio: %d doesn't exists", instrumentId, portfolio.getId())));
+    }
+
+    private PortfolioCash getCash(Portfolio portfolio) {
+        return findCash(portfolio).orElseThrow(
+                () -> new IllegalArgumentException(String.format("Cash in portfolio %d doesn't exists", portfolio.getId())));
     }
 
     private boolean blockInstruments(PortfolioInstruments instrument, Long count) {
@@ -107,6 +148,37 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
         portfolioCashRepository.save(cash);
         return true;
     }
+
+    private void updateBlockedInstrument(Portfolio portfolio, Long instrumentId, Long countChange) {
+        PortfolioInstruments portfolioInstruments = getInstrument(portfolio, instrumentId);
+        portfolioInstruments.setBlockedAmount(portfolioInstruments.getBlockedAmount() + countChange);
+        portfolioInstrumentsRepository.save(portfolioInstruments);
+    }
+
+    private void updateBlockedCash(Portfolio portfolio, BigDecimal amountChange) {
+        PortfolioCash portfolioCash = getCash(portfolio);
+        portfolioCash.setBlockedAmount(portfolioCash.getBlockedAmount().add(amountChange));
+        portfolioCashRepository.save(portfolioCash);
+    }
+
+    private void updateAvailableInstrument(Portfolio portfolio, Long instrumentId, Long countChange) {
+        PortfolioInstruments portfolioInstruments = findInstrument(portfolio, instrumentId)
+                .orElse(PortfolioInstruments.builder()
+                        .portfolio(portfolio)
+                        .instrumentId(instrumentId)
+                        .availableAmount(0L)
+                        .blockedAmount(0L)
+                        .build());
+        portfolioInstruments.setAvailableAmount(portfolioInstruments.getAvailableAmount() + countChange);
+        portfolioInstrumentsRepository.save(portfolioInstruments);
+    }
+
+    private void updateAvailableCash(Portfolio portfolio, BigDecimal amountChange) {
+        PortfolioCash portfolioCash = getCash(portfolio);
+        portfolioCash.setAvailableAmount(portfolioCash.getAvailableAmount().add(amountChange));
+        portfolioCashRepository.save(portfolioCash);
+    }
+
 }
 
 

@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class UserCreatedListener {
     private final PortfolioServiceImpl portfolioServiceImpl;
-    @KafkaListener(topics = "user-created", groupId = "user-created-group", containerFactory = "kafkaListenerContainerFactory")
+    @KafkaListener(topics = "user-created", groupId = "user-created-group", containerFactory = "userKafkaListenerContainerFactory")
     public void userCreatedHandler(
             @Payload UserMessages.UserCreatedEvent request,
             @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {

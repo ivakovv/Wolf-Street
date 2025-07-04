@@ -3,6 +3,7 @@ package com.example.portfolio_service.config;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.aws.protobuf.DealMessages;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,8 +23,10 @@ import io.confluent.kafka.serializers.protobuf.KafkaProtobufDeserializerConfig;
 public class KafkaConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServer;
+    @Value("${spring.kafka.schema-registry-url}")
+    private String schemaRegistryUrl;
     @Bean
-    Map<String, Object> consumerConfig(){
+    Map<String, Object> userConsumerConfig(){
         final Map<String, Object> config = new HashMap<>();
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer);
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
@@ -31,20 +34,48 @@ public class KafkaConfig {
         config.put(ConsumerConfig.GROUP_ID_CONFIG, "user-created-group");
         config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
         config.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
-        config.put(KafkaProtobufDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081");
+        config.put(KafkaProtobufDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
         config.put(KafkaProtobufDeserializerConfig.SPECIFIC_PROTOBUF_VALUE_TYPE, UserMessages.UserCreatedEvent.class);
         return config;
     }
 
     @Bean
-    public ConsumerFactory<String, UserMessages.UserCreatedEvent> consumerFactory() {
-        return new DefaultKafkaConsumerFactory<>(consumerConfig());
+    public ConsumerFactory<String, UserMessages.UserCreatedEvent> userConsumerFactory() {
+        return new DefaultKafkaConsumerFactory<>(userConsumerConfig());
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, UserMessages.UserCreatedEvent> kafkaListenerContainerFactory
+    public ConcurrentKafkaListenerContainerFactory<String, UserMessages.UserCreatedEvent> userKafkaListenerContainerFactory
             (final ConsumerFactory<String, UserMessages.UserCreatedEvent> consumerFactory) {
         final ConcurrentKafkaListenerContainerFactory<String, UserMessages.UserCreatedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.BATCH);
+        factory.setConsumerFactory(consumerFactory);
+        return factory;
+    }
+
+    @Bean
+    Map<String, Object> tradeConsumerConfig(){
+        final Map<String, Object> config = new HashMap<>();
+        config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer);
+        config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaProtobufDeserializer.class);
+        config.put(ConsumerConfig.GROUP_ID_CONFIG, "executed-deal-group");
+        config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
+        config.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
+        config.put(KafkaProtobufDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
+        config.put(KafkaProtobufDeserializerConfig.SPECIFIC_PROTOBUF_VALUE_TYPE, DealMessages.ExecutedDealMessage.class);
+        return config;
+    }
+
+    @Bean
+    public ConsumerFactory<String, DealMessages.ExecutedDealMessage> tradeConsumerFactory(){
+        return new DefaultKafkaConsumerFactory<>(tradeConsumerConfig());
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, DealMessages.ExecutedDealMessage> dealKafkaListenerContainerFactory
+            (final ConsumerFactory<String, DealMessages.ExecutedDealMessage> consumerFactory){
+        final ConcurrentKafkaListenerContainerFactory<String, DealMessages.ExecutedDealMessage> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.BATCH);
         factory.setConsumerFactory(consumerFactory);
         return factory;
