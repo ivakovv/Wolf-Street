@@ -25,6 +25,7 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
 
     @Override
     public boolean validateAndBlockForSale(Long userId, Long portfolioId, Long instrumentId, Long count) {
+        log.info("validating portfolio: {} for sale instrument: {} in count: {}", portfolioId, instrumentId, count);
         return findUserPortfolio(userId, portfolioId)
                 .flatMap(portfolio -> findInstrument(portfolio, instrumentId))
                 .map(instrument -> blockInstruments(instrument, count))
@@ -33,6 +34,7 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
 
     @Override
     public boolean validateAndBlockForBuy(Long userId, Long portfolioId, String total) {
+        log.info("validating portfolio: {} for buy on total: {}", portfolioId, total);
         return findUserPortfolio(userId, portfolioId)
                 .flatMap(this::findCash)
                 .map(cash -> blockCash(cash, new BigDecimal(total)))
@@ -41,31 +43,51 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
 
     @Override
     @Transactional
-    public boolean unblockInstruments(Long userId, Long portfolioId, Long instrumentId, Long count) {
-        return findUserPortfolio(userId, portfolioId)
-                .flatMap(portfolio -> findInstrument(portfolio, instrumentId))
-                .map(instrument -> releaseInstruments(instrument, count))
-                .orElse(false);
-    }
-
-    @Override
-    @Transactional
-    public boolean unblockCash(Long userId, Long portfolioId, BigDecimal amount) {
-        return findUserPortfolio(userId, portfolioId)
-                .flatMap(this::findCash)
-                .map(cash -> releaseCash(cash, amount))
-                .orElse(false);
-    }
-
-    @Override
-    @Transactional
-    public void processDeal(
+    public void processExecutedDeal(
             Long buyUserId, Long saleUserId, Long portfolioBuyId, Long portfolioSaleId, Long instrumentId, Long count, BigDecimal lotPrice) {
         try {
             processDealForSaleSide(saleUserId, portfolioSaleId, instrumentId, count, lotPrice);
             processDealForBuySide(buyUserId, portfolioBuyId, instrumentId, count, lotPrice);
-        } catch (IllegalArgumentException e) {
-            log.error("processDeal failed: {}", e.getMessage());
+        } catch (Exception e) {
+            log.error("process executed Deal failed: {}", e.getMessage());
+        }
+    }
+
+    @Override
+    @Transactional
+    public void processCancelledDeal(
+            Long buyUserId, Long saleUserId, Long portfolioBuyId, Long portfolioSaleId, Long instrumentId, Long count, BigDecimal lotPrice){
+        try{
+            unblockInstruments(saleUserId, portfolioSaleId, instrumentId, count);
+            unblockCash(buyUserId, portfolioBuyId, lotPrice.multiply(new BigDecimal(count)));
+        } catch (Exception e){
+            log.error("process cancelled Deal failed: {}", e.getMessage());
+        }
+    }
+
+    private void unblockInstruments(Long userId, Long portfolioId, Long instrumentId, Long count) {
+        PortfolioInstruments instrument = findUserPortfolio(userId, portfolioId)
+                .flatMap(portfolio -> findInstrument(portfolio, instrumentId))
+                .orElseThrow(() -> new RuntimeException(
+                        String.format("Instrument %d for user %d doesn't exists", instrumentId, userId)
+                ));
+        if (!releaseInstruments(instrument, count)) {
+            throw new RuntimeException(
+                    String.format("The blocked count less than provided count %d", count)
+            );
+        }
+    }
+
+    private void unblockCash(Long userId, Long portfolioId, BigDecimal amount) {
+        PortfolioCash cash = findUserPortfolio(userId, portfolioId)
+                .flatMap(this::findCash)
+                .orElseThrow(() -> new RuntimeException(
+                        String.format("Cash for user: %d doesn't exists", userId)
+                ));
+        if(!releaseCash(cash, amount)){
+            throw new RuntimeException(
+                    String.format("The blocked amount less than provided amount %s", amount)
+            );
         }
     }
 
