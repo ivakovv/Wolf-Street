@@ -2,6 +2,7 @@ package com.example.order_service.service;
 
 import com.aws.protobuf.OrderMessages;
 import com.aws.protobuf.DealMessages;
+import com.example.order_service.entity.Deal;
 import com.example.order_service.entity.Order;
 import com.google.protobuf.Timestamp;
 import lombok.RequiredArgsConstructor;
@@ -67,20 +68,25 @@ public class KafkaNotificationService {
         }
     }
 
-    public void sendErrorDealMessage(Long dealId, Long buyOrderId, Long saleOrderId, String description) {
+    public void sendErrorDealMessage(Deal deal, String description) {
         try {
             DealMessages.ErrorDealMessage message = DealMessages.ErrorDealMessage
                     .newBuilder()
-                    .setDealId(dealId)
-                    .setBuyOrderId(buyOrderId)
-                    .setSaleOrderId(saleOrderId)
+                    .setDealId(deal.getDealId())
+                    .setBuyOrderId(deal.getBuyOrderId())
+                    .setSaleOrderId(deal.getSaleOrderId())
+                    .setBuyerId(deal.getBuyerId())
+                    .setSellerId(deal.getSellerId())
+                    .setBuyPortfolioId(deal.getBuyPortfolioId())
+                    .setSalePortfolioId(deal.getSalePortfolioId())
+                    .setInstrumentId(deal.getInstrumentId())
                     .setDescription(description)
                     .build();
                     
             kafkaTemplate.send("DealsErrors", message);
         } catch (Exception e) {
             log.error("Не удалось отправить сообщение об ошибке сделки dealId={}: {}", 
-                dealId, e.getMessage(), e);
+                deal.getDealId(), e.getMessage(), e);
         }
     }
 

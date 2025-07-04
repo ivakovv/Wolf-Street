@@ -1,6 +1,8 @@
 package com.example.order_service.component;
 
 import com.aws.protobuf.DealMessages;
+import com.example.order_service.entity.Deal;
+import com.example.order_service.mapper.MapperToDeal;
 import com.example.order_service.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,14 +18,11 @@ public class KafkaConsumer {
 
     private final OrderService orderService;
 
+    private final MapperToDeal mapperToDeal;
+
     @KafkaListener(topics = "Deals", groupId = "group_id")
     public void consume(DealMessages.ExecutedDealMessage message) {
-        orderService.processDeal(
-            message.getDealId(),
-            message.getBuyOrderId(),
-            message.getSaleOrderId(),
-            message.getCount(),
-            new BigDecimal(message.getLotPrice())
-        );
+        Deal deal = mapperToDeal.mapToDeal(message);
+        orderService.processDeal(deal);
     }
 }

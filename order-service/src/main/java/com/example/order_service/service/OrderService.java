@@ -2,6 +2,7 @@ package com.example.order_service.service;
 
 import com.example.order_service.dto.CreateRequestDto;
 import com.example.order_service.dto.OrderStatusResponseDto;
+import com.example.order_service.entity.Deal;
 import com.example.order_service.entity.Order;
 import com.example.order_service.enums.OrderStatus;
 import com.example.order_service.mapper.MapperToOrder;
@@ -82,13 +83,13 @@ public class OrderService {
      * Обрабатывает сделку для двух заявок
      */
     @Transactional
-    public void processDeal(Long dealId, Long buyOrderId, Long saleOrderId, Long count, BigDecimal lotPrice) {
+    public void processDeal(Deal deal) {
         try {
-            Order buyOrder = validateAndPrepareOrder(buyOrderId, count, lotPrice);
-            Order saleOrder = validateAndPrepareOrder(saleOrderId, count, lotPrice);
+            Order buyOrder = validateAndPrepareOrder(deal.getBuyOrderId(), deal.getCount(), deal.getLotPrice());
+            Order saleOrder = validateAndPrepareOrder(deal.getSaleOrderId(), deal.getCount(), deal.getLotPrice());
 
-            applyOrderChanges(buyOrder, count, lotPrice);
-            applyOrderChanges(saleOrder, count, lotPrice);
+            applyOrderChanges(buyOrder, deal.getCount(), deal.getLotPrice());
+            applyOrderChanges(saleOrder, deal.getCount(), deal.getLotPrice());
 
             Order savedBuyOrder = orderRepository.save(buyOrder);
             Order savedSaleOrder = orderRepository.save(saleOrder);
@@ -98,9 +99,9 @@ public class OrderService {
 
 
         } catch (Exception e) {
-            log.error("Ошибка при обработке сделки dealId={}: {}", dealId, e.getMessage(), e);
+            log.error("Ошибка при обработке сделки dealId={}: {}", deal.getDealId(), e.getMessage(), e);
 
-            kafkaNotificationService.sendErrorDealMessage(dealId, buyOrderId, saleOrderId,
+            kafkaNotificationService.sendErrorDealMessage(deal,
                     "Ошибка обработки сделки: " + e.getMessage());
             throw e;
         }
