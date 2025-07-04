@@ -20,8 +20,8 @@ public class KafkaConsumer {
 
     private final MapperToDeal mapperToDeal;
 
-    @KafkaListener(topics = "Deals", groupId = "group_id")
-    public void consume(DealMessages.ExecutedDealMessage message) {
+    @KafkaListener(topics = "deals", groupId = "group_id")
+    public void consume(DealMessages.DealExecutedEvent message) {
         Deal deal = mapperToDeal.mapToDeal(message);
         orderService.processDeal(deal);
     }

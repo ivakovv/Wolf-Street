@@ -20,7 +20,7 @@ public interface MapperToDeal {
     @Mapping(expression = "java(message.getCount())", target = "count")
     @Mapping(expression = "java(stringToBigDecimal(message.getLotPrice()))", target = "lotPrice")
     @Mapping(expression = "java(message.getInstrumentId())", target = "instrumentId")
-    Deal mapToDeal(DealMessages.ExecutedDealMessage message);
+    Deal mapToDeal(DealMessages.DealExecutedEvent message);
 
     @org.mapstruct.Named("stringToBigDecimal")
     default BigDecimal stringToBigDecimal(String value) {

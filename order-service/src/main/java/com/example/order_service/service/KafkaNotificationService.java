@@ -19,7 +19,7 @@ public class KafkaNotificationService {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
     
-    private static final String ORDERS_TOPIC = "Orders";
+    private static final String ORDERS_TOPIC = "orders";
 
     public void sendOrderCreatedEvent(Order order) {
         try {
@@ -70,7 +70,7 @@ public class KafkaNotificationService {
 
     public void sendErrorDealMessage(Deal deal, String description) {
         try {
-            DealMessages.ErrorDealMessage message = DealMessages.ErrorDealMessage
+            DealMessages.DealErrorEvent message = DealMessages.DealErrorEvent
                     .newBuilder()
                     .setDealId(deal.getDealId())
                     .setBuyOrderId(deal.getBuyOrderId())
@@ -83,7 +83,7 @@ public class KafkaNotificationService {
                     .setDescription(description)
                     .build();
                     
-            kafkaTemplate.send("DealsErrors", message);
+            kafkaTemplate.send("deals-errors", message);
         } catch (Exception e) {
             log.error("Не удалось отправить сообщение об ошибке сделки dealId={}: {}", 
                 deal.getDealId(), e.getMessage(), e);
