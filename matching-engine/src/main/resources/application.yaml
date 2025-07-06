@@ -16,3 +16,19 @@ spring:
         address: static://localhost:6565
         enable-keep-alive: true
         negotiation-type: plaintext
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 2000ms
+    jedis:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: -1ms
+
+matching-engine:
+  snapshot:
+    ttl-hours: 24
+
+
