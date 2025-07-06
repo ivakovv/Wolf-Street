@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: wolf-street-ingress
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /user-service
+            pathType: Prefix
+            backend:
+              service:
+                name: user-service
+                port:
+                  number: 8080
+          - path: /order-service
+            pathType: Prefix
+            backend:
+              service:
+                name: order-service
+                port:
+                  number: 8085
+          - path: /portfolio-service
+            pathType: Prefix
+            backend:
+              service:
+                name: portfolio-service
+                port:
+                  number: 8083

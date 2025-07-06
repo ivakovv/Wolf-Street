@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-configmap
+data:
+  init.sql: |
+    CREATE DATABASE user_service;
+    CREATE DATABASE order_service;
+    CREATE DATABASE portfolio_service;
