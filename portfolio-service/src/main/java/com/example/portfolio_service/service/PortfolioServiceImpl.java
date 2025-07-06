@@ -11,9 +11,9 @@ import com.example.portfolio_service.entity.Portfolio;
 import com.example.portfolio_service.entity.PortfolioInstruments;
 import com.example.portfolio_service.mapper.MapperToCashPortfolio;
 import com.example.portfolio_service.mapper.MapperToPortfolioCashResponse;
+import com.example.portfolio_service.mapper.MapperToPortfolioHistory;
 import com.example.portfolio_service.mapper.MapperToPortfolioInstrument;
 import com.example.portfolio_service.mapper.MapperToPortfolioInstrumentResponse;
-import com.example.portfolio_service.mapper.MapperToPortfolioHistory;
 import com.example.portfolio_service.repository.PortfolioCashRepository;
 import com.example.portfolio_service.repository.PortfolioInstrumentsRepository;
 import com.example.portfolio_service.repository.PortfolioRepository;
@@ -73,14 +73,14 @@ public class PortfolioServiceImpl implements PortfolioService {
     }
 
     @Override
-    public void addInstrumentToPortfolio(Authentication authentication, InstrumentRequest request){
+    public void addInstrumentToPortfolio(Authentication authentication, InstrumentRequest request) {
         Portfolio portfolio = getPortfolioFromAuth(authentication);
         PortfolioInstruments portfolioInstruments = mapperToPortfolioInstrument.mapToPortfolioInstrument(portfolio, request.instrumentId());
         portfolioInstrumentsRepository.save(portfolioInstruments);
     }
 
     @Override
-    public void removeInstrumentFromPortfolio(Authentication authentication, InstrumentRequest request){
+    public void removeInstrumentFromPortfolio(Authentication authentication, InstrumentRequest request) {
         Portfolio portfolio = getPortfolioFromAuth(authentication);
         PortfolioInstruments instrument = portfolioInstrumentsRepository
                 .findByPortfolioAndInstrumentId(portfolio, request.instrumentId())
@@ -125,6 +125,7 @@ public class PortfolioServiceImpl implements PortfolioService {
     private void createCashPortfolio(Portfolio portfolio) {
         portfolioCashRepository.save(mapperToCashPortfolio.mapToPortfolioCash(portfolio));
     }
+
     private boolean isInstrumentEmpty(PortfolioInstruments instrument) {
         return instrument.getAvailableAmount().equals(0L) && instrument.getBlockedAmount().equals(0L);
     }
