@@ -26,7 +26,7 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
     @Override
     public boolean validateAndBlockForSale(Long userId, Long portfolioId, Long instrumentId, Long count) {
         log.info("validating portfolio: {} for sale instrument: {} in count: {}", portfolioId, instrumentId, count);
-        return findUserPortfolio(userId, portfolioId)
+        return findUserPortfolio(portfolioId)
                 .flatMap(portfolio -> findInstrument(portfolio, instrumentId))
                 .map(instrument -> blockInstruments(instrument, count))
                 .orElse(false);
@@ -35,7 +35,7 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
     @Override
     public boolean validateAndBlockForBuy(Long userId, Long portfolioId, String total) {
         log.info("validating portfolio: {} for buy on total: {}", portfolioId, total);
-        return findUserPortfolio(userId, portfolioId)
+        return findUserPortfolio(portfolioId)
                 .flatMap(this::findCash)
                 .map(cash -> blockCash(cash, new BigDecimal(total)))
                 .orElse(false);
@@ -44,10 +44,10 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
     @Override
     @Transactional
     public void processExecutedDeal(
-            Long buyUserId, Long saleUserId, Long portfolioBuyId, Long portfolioSaleId, Long instrumentId, Long count, BigDecimal lotPrice) {
+            Long portfolioBuyId, Long portfolioSaleId, Long instrumentId, Long count, BigDecimal lotPrice) {
         try {
-            processDealForSaleSide(saleUserId, portfolioSaleId, instrumentId, count, lotPrice);
-            processDealForBuySide(buyUserId, portfolioBuyId, instrumentId, count, lotPrice);
+            processDealForSaleSide(portfolioSaleId, instrumentId, count, lotPrice);
+            processDealForBuySide(portfolioBuyId, instrumentId, count, lotPrice);
         } catch (Exception e) {
             log.error("process executed Deal failed: {}", e.getMessage());
         }
@@ -56,20 +56,20 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
     @Override
     @Transactional
     public void processCancelledDeal(
-            Long buyUserId, Long saleUserId, Long portfolioBuyId, Long portfolioSaleId, Long instrumentId, Long count, BigDecimal lotPrice){
+            Long portfolioBuyId, Long portfolioSaleId, Long instrumentId, Long count, BigDecimal lotPrice){
         try{
-            unblockInstruments(saleUserId, portfolioSaleId, instrumentId, count);
-            unblockCash(buyUserId, portfolioBuyId, lotPrice.multiply(new BigDecimal(count)));
+            unblockInstruments(portfolioSaleId, instrumentId, count);
+            unblockCash(portfolioBuyId, lotPrice.multiply(new BigDecimal(count)));
         } catch (Exception e){
             log.error("process cancelled Deal failed: {}", e.getMessage());
         }
     }
 
-    private void unblockInstruments(Long userId, Long portfolioId, Long instrumentId, Long count) {
-        PortfolioInstruments instrument = findUserPortfolio(userId, portfolioId)
+    private void unblockInstruments(Long portfolioId, Long instrumentId, Long count) {
+        PortfolioInstruments instrument = findUserPortfolio(portfolioId)
                 .flatMap(portfolio -> findInstrument(portfolio, instrumentId))
                 .orElseThrow(() -> new RuntimeException(
-                        String.format("Instrument %d for user %d doesn't exists", instrumentId, userId)
+                        String.format("Instrument %d for portfolio %d doesn't exists", instrumentId, portfolioId)
                 ));
         if (!releaseInstruments(instrument, count)) {
             throw new RuntimeException(
@@ -78,11 +78,11 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
         }
     }
 
-    private void unblockCash(Long userId, Long portfolioId, BigDecimal amount) {
-        PortfolioCash cash = findUserPortfolio(userId, portfolioId)
+    private void unblockCash(Long portfolioId, BigDecimal amount) {
+        PortfolioCash cash = findUserPortfolio(portfolioId)
                 .flatMap(this::findCash)
                 .orElseThrow(() -> new RuntimeException(
-                        String.format("Cash for user: %d doesn't exists", userId)
+                        String.format("Cash for portfolio: %d doesn't exists", portfolioId)
                 ));
         if(!releaseCash(cash, amount)){
             throw new RuntimeException(
@@ -91,21 +91,20 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
         }
     }
 
-    private void processDealForSaleSide(Long saleUserId, Long portfolioSaleId, Long instrumentId, Long count, BigDecimal lotPrice) {
-        Portfolio portfolio = getUserPortfolio(saleUserId, portfolioSaleId);
+    private void processDealForSaleSide(Long portfolioSaleId, Long instrumentId, Long count, BigDecimal lotPrice) {
+        Portfolio portfolio = getUserPortfolio(portfolioSaleId);
         updateAvailableCash(portfolio, lotPrice.multiply(new BigDecimal(count)));
         updateBlockedInstrument(portfolio, instrumentId, -count);
     }
 
-    private void processDealForBuySide(Long buyUserId, Long portfolioBuyId, Long instrumentId, Long count, BigDecimal lotPrice) {
-        Portfolio portfolio = getUserPortfolio(buyUserId, portfolioBuyId);
+    private void processDealForBuySide(Long portfolioBuyId, Long instrumentId, Long count, BigDecimal lotPrice) {
+        Portfolio portfolio = getUserPortfolio(portfolioBuyId);
         updateBlockedCash(portfolio, lotPrice.multiply(new BigDecimal(count)).negate());
         updateAvailableInstrument(portfolio, instrumentId, count);
     }
 
-    private Optional<Portfolio> findUserPortfolio(Long userId, Long portfolioId) {
-        return portfolioRepository.findById(portfolioId)
-                .filter(portfolio -> portfolio.getUserId().equals(userId));
+    private Optional<Portfolio> findUserPortfolio(Long portfolioId) {
+        return portfolioRepository.findById(portfolioId);
     }
 
     private Optional<PortfolioInstruments> findInstrument(Portfolio portfolio, Long instrumentId) {
@@ -116,9 +115,9 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
         return portfolioCashRepository.findByPortfolioAndCurrency(portfolio, "RUB");
     }
 
-    private Portfolio getUserPortfolio(Long userId, Long portfolioId) {
-        return findUserPortfolio(userId, portfolioId).orElseThrow(
-                () -> new IllegalArgumentException(String.format("Portfolio %d for user %d doesn't exists", portfolioId, userId)));
+    private Portfolio getUserPortfolio(Long portfolioId) {
+        return findUserPortfolio(portfolioId).orElseThrow(
+                () -> new IllegalArgumentException(String.format("Portfolio %d doesn't exists", portfolioId)));
     }
 
     private PortfolioInstruments getInstrument(Portfolio portfolio, Long instrumentId) {

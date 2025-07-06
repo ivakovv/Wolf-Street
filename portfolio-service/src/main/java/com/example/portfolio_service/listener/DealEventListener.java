@@ -27,8 +27,6 @@ public class DealEventListener {
                 log.info("processing executed deal...");
                 DealMessages.DealExecutedEvent dealExecutedEvent = request.getDealExecuted();
                 portfolioValidationService.processExecutedDeal(
-                        dealExecutedEvent.getBuyerId(),
-                        dealExecutedEvent.getSellerId(),
                         dealExecutedEvent.getBuyPortfolioId(),
                         dealExecutedEvent.getSalePortfolioId(),
                         dealExecutedEvent.getInstrumentId(),
@@ -39,8 +37,6 @@ public class DealEventListener {
                 log.info("processing cancelled deal...");
                 DealMessages.DealCancelledEvent dealCancelledEvent = request.getDealCancelled();
                 portfolioValidationService.processCancelledDeal(
-                        dealCancelledEvent.getBuyerId(),
-                        dealCancelledEvent.getSellerId(),
                         dealCancelledEvent.getBuyPortfolioId(),
                         dealCancelledEvent.getSalePortfolioId(),
                         dealCancelledEvent.getInstrumentId(),
