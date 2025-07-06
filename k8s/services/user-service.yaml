@@ -54,13 +54,3 @@ spec:
                 secretKeyRef:
                   name: postgres-secret
                   key: POSTGRES_PASSWORD
-            - name: S3_SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: s3-secrets
-                  key: S3_SECRET_KEY
-            - name: S3_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: s3-secrets
-                  key: S3_KEY_ID
