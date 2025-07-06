@@ -14,5 +14,14 @@ public record Order(Long orderId,
                     BigDecimal lotPrice,
                     OrderType type,
                     OrderStatus status,
-                    OffsetDateTime createdAt) {
+                    OffsetDateTime createdAt) implements Comparable<Order> {
+
+    @Override
+    public int compareTo(Order other) {
+        int priceCmp = this.lotPrice().compareTo(other.lotPrice());
+        if (priceCmp != 0) {
+            return priceCmp;
+        }
+        return this.createdAt().compareTo(other.createdAt());
+    }
 }

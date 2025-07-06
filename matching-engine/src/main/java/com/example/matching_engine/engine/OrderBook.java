@@ -1,10 +1,18 @@
 package com.example.matching_engine.engine;
 
 import com.example.matching_engine.dto.Order;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.time.OffsetDateTime;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
+@Getter
+@Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OrderBook {
 
     private final PriorityQueue<Order> bids = new PriorityQueue<>(
@@ -15,10 +23,30 @@ public class OrderBook {
             Comparator.comparing(Order::lotPrice).thenComparing(Order::createdAt)
     );
 
+    private Long instrumentId;
+    private OffsetDateTime lastSnapshotTime;
+    private long totalBidsCount;
+    private long totalAsksCount;
+
+    public OrderBook() {
+        this.lastSnapshotTime = OffsetDateTime.now();
+    }
+
+    public OrderBook(Long instrumentId) {
+        this();
+        this.instrumentId = instrumentId;
+    }
+
     public void addOrder(Order order) {
         switch (order.type()) {
-            case BUY -> bids.add(order);
-            case SALE -> asks.add(order);
+            case BUY -> {
+                bids.add(order);
+                totalBidsCount++;
+            }
+            case SALE -> {
+                asks.add(order);
+                totalAsksCount++;
+            }
         }
     }
 
@@ -31,11 +59,19 @@ public class OrderBook {
     }
 
     public Order pollBestBid() {
-        return bids.poll();
+        Order order = bids.poll();
+        if (order != null) {
+            totalBidsCount--;
+        }
+        return order;
     }
 
     public Order pollBestAsk() {
-        return asks.poll();
+        Order order = asks.poll();
+        if (order != null) {
+            totalAsksCount--;
+        }
+        return order;
     }
 
     public boolean hasBids() {
@@ -45,5 +81,14 @@ public class OrderBook {
     public boolean hasAsks() {
         return !asks.isEmpty();
     }
-}
 
+    @JsonIgnore
+    public int getBidsSize() {
+        return bids.size();
+    }
+
+    @JsonIgnore
+    public int getAsksSize() {
+        return asks.size();
+    }
+}

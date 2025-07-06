@@ -10,12 +10,12 @@ import org.springframework.stereotype.Component;
 public class KafkaConsumer {
 
 
-    @KafkaListener(topics = "orders", groupId = "matching-engine-group")
+    @KafkaListener(topics = "orders", groupId = "orders-group")
     public void consumeOrderCreated(OrderMessages.OrderCreatedEvent message) {
 
     }
 
-    @KafkaListener(topics = "orders", groupId = "matching-engine-group")
+    @KafkaListener(topics = "orders", groupId = "orders-group")
     public void consumeOrderUpdated(OrderMessages.OrderUpdatedEvent message) {
 
     }
