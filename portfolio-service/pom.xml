@@ -101,6 +101,11 @@
             <version>4.31.1</version>
         </dependency>
         <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java-util</artifactId>
+            <version>4.31.1</version>
+        </dependency>
+        <dependency>
             <groupId>io.confluent</groupId>
             <artifactId>kafka-protobuf-serializer</artifactId>
             <version>8.0.0</version>
@@ -110,6 +115,11 @@
         <dependency>
             <groupId>net.devh</groupId>
             <artifactId>grpc-server-spring-boot-starter</artifactId>
+            <version>3.1.0.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>net.devh</groupId>
+            <artifactId>grpc-client-spring-boot-starter</artifactId>
             <version>3.1.0.RELEASE</version>
         </dependency>
         <dependency>
@@ -149,6 +159,7 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
+                            <includeStdTypes>true</includeStdTypes>
                             <protocVersion>3.25.1</protocVersion>
                             <inputDirectories>
                                 <include>src/main/proto</include>

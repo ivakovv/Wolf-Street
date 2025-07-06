@@ -2,7 +2,9 @@ package com.example.portfolio_service.controller;
 
 import com.example.portfolio_service.dto.InstrumentRequest;
 import com.example.portfolio_service.dto.PortfolioCashResponseDto;
+import com.example.portfolio_service.dto.PortfolioHistoryResponseDto;
 import com.example.portfolio_service.dto.PortfolioInstrumentResponseDto;
+import com.example.portfolio_service.dto.PortfolioValueResponseDto;
 import com.example.portfolio_service.service.interfaces.PortfolioService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -65,5 +67,25 @@ public class PortfolioController {
     public ResponseEntity<Void> removeInstrument(Authentication authentication, @RequestBody InstrumentRequest request) {
         portfolioService.removeInstrumentFromPortfolio(authentication, request);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/value")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Текущий баланс успешно получен!"),
+            @ApiResponse(responseCode = "401", description = "Пользователь не авторизован!"),
+            @ApiResponse(responseCode = "404", description = "Портфель пользователя не найден!"),
+    })
+    public ResponseEntity<PortfolioValueResponseDto> getCurrentPortfolioValue(Authentication authentication){
+        return ResponseEntity.ok(portfolioService.getCurrentPortfolioValue(authentication));
+    }
+
+    @GetMapping("/history")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "История сделок успешно получена!"),
+            @ApiResponse(responseCode = "401", description = "Пользователь не авторизован!"),
+            @ApiResponse(responseCode = "404", description = "Портфель пользователя не найден!"),
+    })
+    public ResponseEntity<List<PortfolioHistoryResponseDto>> getPortfolioHistory(Authentication authentication){
+        return ResponseEntity.ok(portfolioService.getPortfolioHistory(authentication));
     }
 }

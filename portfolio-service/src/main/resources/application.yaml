@@ -30,6 +30,11 @@ spring:
 grpc:
   server:
     port: 6565
+  client:
+    analytic-service:
+      address: static://localhost:6567
+      enable-keep-alive: true
+      negotiation-type: plaintext
 security:
   jwt:
     secret_key: dXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3M=
