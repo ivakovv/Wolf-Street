@@ -16,6 +16,4 @@ public class Deal {
     private Long count;
     private BigDecimal lotPrice;
     private Long instrumentId;
-    private Long buyerId;
-    private Long sellerId;
 }

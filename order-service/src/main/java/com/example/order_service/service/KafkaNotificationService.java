@@ -75,8 +75,6 @@ public class KafkaNotificationService {
                     .setDealId(deal.getDealId())
                     .setBuyOrderId(deal.getBuyOrderId())
                     .setSaleOrderId(deal.getSaleOrderId())
-                    .setBuyerId(deal.getBuyerId())
-                    .setSellerId(deal.getSellerId())
                     .setBuyPortfolioId(deal.getBuyPortfolioId())
                     .setSalePortfolioId(deal.getSalePortfolioId())
                     .setInstrumentId(deal.getInstrumentId())

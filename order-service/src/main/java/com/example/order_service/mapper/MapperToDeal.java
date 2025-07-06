@@ -13,8 +13,6 @@ public interface MapperToDeal {
     @Mapping(expression = "java(message.getDealId())", target = "dealId")
     @Mapping(expression = "java(message.getBuyOrderId())", target = "buyOrderId")
     @Mapping(expression = "java(message.getSaleOrderId())", target = "saleOrderId")
-    @Mapping(expression = "java(message.getBuyerId())", target = "buyerId")
-    @Mapping(expression = "java(message.getSellerId())", target = "sellerId")
     @Mapping(expression = "java(message.getBuyPortfolioId())", target = "buyPortfolioId")
     @Mapping(expression = "java(message.getSalePortfolioId())", target = "salePortfolioId")
     @Mapping(expression = "java(message.getCount())", target = "count")
