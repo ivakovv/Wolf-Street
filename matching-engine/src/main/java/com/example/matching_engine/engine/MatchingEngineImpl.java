@@ -5,10 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.PriorityQueue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.example.matching_engine.repository.OrderBookRedisRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +26,11 @@ public class MatchingEngineImpl implements MatchingEngine {
     private final OrderBookRedisRepository orderBookRedisRepository;
     private final ConcurrentHashMap<Long, OrderBook> orderBooks = new ConcurrentHashMap<>();
     private final AtomicLong dealIdGenerator = new AtomicLong(1);
+
+    @PostConstruct
+    public void init(){
+        restoreAllOrderBooks();
+    }
 
     @Override
     public List<Deal> processOrder(Order order) {
@@ -107,5 +114,14 @@ public class MatchingEngineImpl implements MatchingEngine {
                 count,
                 price
         );
+    }
+
+    private void restoreAllOrderBooks() {
+        Set<String> keys = orderBookRedisRepository.getAllOrderBookKeys();
+        for (String key : keys) {
+            Long instrumentId = Long.valueOf(key.replace("orderbook:", ""));
+            OrderBook orderBook = orderBookRedisRepository.loadOrderBook(instrumentId);
+            orderBooks.put(instrumentId, orderBook);
+        }
     }
 }

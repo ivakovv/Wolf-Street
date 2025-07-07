@@ -8,6 +8,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.time.OffsetDateTime;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -50,6 +51,10 @@ public class OrderBookRedisRepository {
         }
         log.info("Снапшот не найден, создаем новый стакан: instrumentId={}", instrumentId);
         return new OrderBook(instrumentId);
+    }
+
+    public Set<String> getAllOrderBookKeys() {
+        return redisTemplate.keys(ORDER_BOOK_KEY_PREFIX + "*");
     }
 
     public void deleteOrderBook(Long instrumentId) {
