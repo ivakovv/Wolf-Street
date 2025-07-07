@@ -16,26 +16,21 @@ import java.util.concurrent.TimeUnit;
 public class OrderBookRedisRepository {
 
     private final RedisTemplate<String, OrderBook> redisTemplate;
-
     private static final String ORDER_BOOK_KEY_PREFIX = "orderbook:";
     @Value("${matching-engine.snapshot.ttl-hours}")
     private int ttl_hours;
 
     public void saveOrderBook(Long instrumentId, OrderBook orderBook) {
         String key = ORDER_BOOK_KEY_PREFIX + instrumentId;
-
         try {
             orderBook.setLastSnapshotTime(OffsetDateTime.now());
-
             redisTemplate.opsForValue().set(key, orderBook, ttl_hours, TimeUnit.HOURS);
-
             log.info("Снапшот сохранен: instrumentId={}, bids={}, asks={}, totalBids={}, totalAsks={}",
                     instrumentId,
                     orderBook.getBidsSize(),
                     orderBook.getAsksSize(),
                     orderBook.getTotalBidsCount(),
                     orderBook.getTotalAsksCount());
-
         } catch (Exception e) {
             log.error("Ошибка сохранения снапшота: instrumentId={}, error={}", instrumentId, e.getMessage());
         }
@@ -43,20 +38,16 @@ public class OrderBookRedisRepository {
 
     public OrderBook loadOrderBook(Long instrumentId) {
         String key = ORDER_BOOK_KEY_PREFIX + instrumentId;
-
         try {
             OrderBook orderBook = redisTemplate.opsForValue().get(key);
-
             if (orderBook != null) {
                 log.info("Загружен снапшот: instrumentId={}, bids={}, asks={}",
                         instrumentId, orderBook.getBidsSize(), orderBook.getAsksSize());
                 return orderBook;
             }
-
         } catch (Exception e) {
             log.error("Ошибка загрузки снапшота: instrumentId={}, error={}", instrumentId, e.getMessage());
         }
-
         log.info("Снапшот не найден, создаем новый стакан: instrumentId={}", instrumentId);
         return new OrderBook(instrumentId);
     }

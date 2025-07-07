@@ -8,8 +8,11 @@ message DealEvent {
     DealExecutedEvent deal_executed = 1;
     DealCancelledEvent deal_cancelled = 2;
     DealErrorEvent deal_error = 3;
-
   }
+}
+enum OrderType {
+  BUY = 0;
+  SALE = 1;
 }
 
 message DealExecutedEvent {
@@ -24,12 +27,12 @@ message DealExecutedEvent {
 }
 
 message DealCancelledEvent {
-  int64 deal_id = 1;
-  int64 buy_portfolio_id = 2;
-  int64 sale_portfolio_id = 3;
+  int64 order_id = 1;
+  int64 portfolio_id = 2;
   int64 count = 4;
   string lot_price = 5;
   int64 instrument_id = 6;
+  OrderType order_type = 7;
 }
 
 message DealErrorEvent {

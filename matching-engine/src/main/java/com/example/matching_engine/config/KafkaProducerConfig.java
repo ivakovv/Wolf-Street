@@ -25,7 +25,7 @@ public class KafkaProducerConfig {
     private String schemaRegistryUrl;
 
     @Bean
-    public ProducerFactory<String, DealMessages> producerFactory() {
+    public ProducerFactory<String, DealMessages.DealEvent> producerFactory() {
         Map<String, Object> config = new HashMap<>();
         config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer);
         config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -36,7 +36,7 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, DealMessages> kafkaTemplate(ProducerFactory<String, DealMessages> producerFactory) {
+    public KafkaTemplate<String, DealMessages.DealEvent> kafkaTemplate(ProducerFactory<String, DealMessages.DealEvent> producerFactory) {
         return new KafkaTemplate<>(producerFactory);
     }
 }

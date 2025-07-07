@@ -15,7 +15,9 @@ public record Order(Long orderId,
                     OrderType type,
                     OrderStatus status,
                     OffsetDateTime createdAt) implements Comparable<Order> {
-
+    public Order withCount(long newCount) {
+        return new Order(orderId(), userId(), portfolioId(), instrumentId(), newCount, lotPrice(), type(), status(), createdAt());
+    }
     @Override
     public int compareTo(Order other) {
         int priceCmp = this.lotPrice().compareTo(other.lotPrice());
