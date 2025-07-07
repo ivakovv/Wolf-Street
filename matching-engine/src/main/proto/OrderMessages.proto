@@ -4,6 +4,13 @@ option java_outer_classname = "OrderMessages";
 
 import "google/protobuf/timestamp.proto";
 
+message OrderEvent {
+  oneof event {
+    OrderCreatedEvent order_created = 1;
+    OrderUpdatedEvent order_updated = 2;
+  }
+}
+
 enum OrderType {
   BUY = 0;
   SALE = 1;
