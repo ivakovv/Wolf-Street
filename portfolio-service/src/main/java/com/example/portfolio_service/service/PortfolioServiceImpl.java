@@ -2,12 +2,14 @@ package com.example.portfolio_service.service;
 
 import com.aws.protobuf.AnalyticServiceProto;
 import com.aws.protobuf.UserMessages;
+import com.example.portfolio_service.dto.CashRequestDto;
 import com.example.portfolio_service.dto.InstrumentRequest;
 import com.example.portfolio_service.dto.PortfolioCashResponseDto;
 import com.example.portfolio_service.dto.PortfolioHistoryResponseDto;
 import com.example.portfolio_service.dto.PortfolioInstrumentResponseDto;
 import com.example.portfolio_service.dto.PortfolioValueResponseDto;
 import com.example.portfolio_service.entity.Portfolio;
+import com.example.portfolio_service.entity.PortfolioCash;
 import com.example.portfolio_service.entity.PortfolioInstruments;
 import com.example.portfolio_service.mapper.MapperToCashPortfolio;
 import com.example.portfolio_service.mapper.MapperToPortfolioCashResponse;
@@ -89,6 +91,16 @@ public class PortfolioServiceImpl implements PortfolioService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("Instrument %d contains values", request.instrumentId()));
         }
         portfolioInstrumentsRepository.delete(instrument);
+    }
+
+    @Override
+    public PortfolioCashResponseDto addCash(Authentication authentication, CashRequestDto request) {
+        PortfolioCash cash = portfolioCashRepository.findByPortfolioAndCurrency(
+                getPortfolioFromAuth(authentication), request.currency()).orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Portfolio cash doesn't exists"));
+        cash.setAvailableAmount(cash.getAvailableAmount().add(request.amount()));
+        PortfolioCash savedCash = portfolioCashRepository.save(cash);
+        return mapperToPortfolioCashResponse.mapToPortfolioCashResponseDto(savedCash);
     }
 
     //TODO скорее всего обращение к MarketData, для получения текущей информации по стоимости активов

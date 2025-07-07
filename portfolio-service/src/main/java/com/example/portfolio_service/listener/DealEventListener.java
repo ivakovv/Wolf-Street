@@ -1,6 +1,7 @@
 package com.example.portfolio_service.listener;
 
 import com.aws.protobuf.DealMessages;
+import com.example.portfolio_service.enums.OrderType;
 import com.example.portfolio_service.service.interfaces.PortfolioValidationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,11 +38,11 @@ public class DealEventListener {
                 log.info("processing cancelled deal...");
                 DealMessages.DealCancelledEvent dealCancelledEvent = request.getDealCancelled();
                 portfolioValidationService.processCancelledDeal(
-                        dealCancelledEvent.getBuyPortfolioId(),
-                        dealCancelledEvent.getSalePortfolioId(),
+                        dealCancelledEvent.getPortfolioId(),
                         dealCancelledEvent.getInstrumentId(),
                         dealCancelledEvent.getCount(),
-                        new BigDecimal(dealCancelledEvent.getLotPrice())
+                        new BigDecimal(dealCancelledEvent.getLotPrice()),
+                        OrderType.valueOf(dealCancelledEvent.getOrderType().name())
                 );
             }
             case EVENT_NOT_SET -> log.warn("Received a DealEvent with no event");

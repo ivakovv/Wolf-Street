@@ -1,5 +1,6 @@
 package com.example.portfolio_service.controller;
 
+import com.example.portfolio_service.dto.CashRequestDto;
 import com.example.portfolio_service.dto.InstrumentRequest;
 import com.example.portfolio_service.dto.PortfolioCashResponseDto;
 import com.example.portfolio_service.dto.PortfolioHistoryResponseDto;
@@ -34,6 +35,17 @@ public class PortfolioController {
     })
     public ResponseEntity<List<PortfolioCashResponseDto>> getCash(Authentication authentication) {
         return ResponseEntity.ok(portfolioService.getCashForUser(authentication));
+    }
+
+    @PostMapping("/cash")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Средства успешно зачислены!"),
+            @ApiResponse(responseCode = "401", description = "Пользователь не авторизован!"),
+            @ApiResponse(responseCode = "404", description = "Портфель пользователя не найден!"),
+    })
+    public ResponseEntity<PortfolioCashResponseDto> addCash(Authentication authentication, @RequestBody CashRequestDto request){
+        portfolioService.addCash(authentication, request);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/instruments")

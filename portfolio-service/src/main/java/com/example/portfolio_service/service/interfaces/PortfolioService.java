@@ -1,6 +1,7 @@
 package com.example.portfolio_service.service.interfaces;
 
 import com.aws.protobuf.UserMessages;
+import com.example.portfolio_service.dto.CashRequestDto;
 import com.example.portfolio_service.dto.InstrumentRequest;
 import com.example.portfolio_service.dto.PortfolioCashResponseDto;
 import com.example.portfolio_service.dto.PortfolioHistoryResponseDto;
@@ -18,4 +19,5 @@ public interface PortfolioService {
     void removeInstrumentFromPortfolio(Authentication authentication, InstrumentRequest request);
     PortfolioValueResponseDto getCurrentPortfolioValue(Authentication authentication);
     List<PortfolioHistoryResponseDto> getPortfolioHistory(Authentication authentication);
+    PortfolioCashResponseDto addCash(Authentication authentication, CashRequestDto request);
 }

@@ -3,6 +3,7 @@ package com.example.portfolio_service.service;
 import com.example.portfolio_service.entity.Portfolio;
 import com.example.portfolio_service.entity.PortfolioCash;
 import com.example.portfolio_service.entity.PortfolioInstruments;
+import com.example.portfolio_service.enums.OrderType;
 import com.example.portfolio_service.repository.PortfolioCashRepository;
 import com.example.portfolio_service.repository.PortfolioInstrumentsRepository;
 import com.example.portfolio_service.repository.PortfolioRepository;
@@ -51,15 +52,23 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
         } catch (Exception e) {
             log.error("process executed Deal failed: {}", e.getMessage());
         }
+
+        try{
+            System.out.println();
+        } catch (OutOfMemoryError error){
+            log.error("dfd");
+        }
     }
 
     @Override
     @Transactional
     public void processCancelledDeal(
-            Long portfolioBuyId, Long portfolioSaleId, Long instrumentId, Long count, BigDecimal lotPrice){
+            Long portfolioId, Long instrumentId, Long count, BigDecimal lotPrice, OrderType orderType){
         try{
-            unblockInstruments(portfolioSaleId, instrumentId, count);
-            unblockCash(portfolioBuyId, lotPrice.multiply(new BigDecimal(count)));
+            switch (orderType){
+                case BUY -> unblockCash(portfolioId, lotPrice.multiply(new BigDecimal(count)));
+                case SALE -> unblockInstruments(portfolioId, instrumentId, count);
+            }
         } catch (Exception e){
             log.error("process cancelled Deal failed: {}", e.getMessage());
         }
