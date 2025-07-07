@@ -15,11 +15,11 @@ import java.util.PriorityQueue;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OrderBook {
 
-    private final PriorityQueue<Order> bids = new PriorityQueue<>(
+    private PriorityQueue<Order> bids = new PriorityQueue<>(
             Comparator.comparing(Order::lotPrice).reversed().thenComparing(Order::createdAt)
     );
 
-    private final PriorityQueue<Order> asks = new PriorityQueue<>(
+    private PriorityQueue<Order> asks = new PriorityQueue<>(
             Comparator.comparing(Order::lotPrice).thenComparing(Order::createdAt)
     );
 
@@ -72,6 +72,16 @@ public class OrderBook {
             totalAsksCount--;
         }
         return order;
+    }
+
+    public void setBids(PriorityQueue<Order> bids) {
+        this.bids = new PriorityQueue<>(Comparator.comparing(Order::lotPrice).reversed().thenComparing(Order::createdAt));
+        this.bids.addAll(bids);
+    }
+
+    public void setAsks(PriorityQueue<Order> asks) {
+        this.asks = new PriorityQueue<>(Comparator.comparing(Order::lotPrice).thenComparing(Order::createdAt));
+        this.asks.addAll(asks);
     }
 
     public boolean hasBids() {

@@ -42,6 +42,8 @@ public class OrderBookRedisRepository {
         try {
             OrderBook orderBook = redisTemplate.opsForValue().get(key);
             if (orderBook != null) {
+                orderBook.setBids(orderBook.getBids());
+                orderBook.setAsks(orderBook.getAsks());
                 log.info("Загружен снапшот: instrumentId={}, bids={}, asks={}",
                         instrumentId, orderBook.getBidsSize(), orderBook.getAsksSize());
                 return orderBook;
