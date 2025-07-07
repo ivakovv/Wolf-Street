@@ -18,7 +18,9 @@
     <packaging>pom</packaging>
 
     <properties>
+
         <java.version>22</java.version>
+
     </properties>
 
     <modules>
