@@ -1,0 +1,7 @@
+CREATE TABLE user_role (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    user_id BIGINT NOT NULL,
+    role_type VARCHAR(100) NOT NULL
+);
+
+ALTER TABLE user_role ADD CONSTRAINT fk_user_role_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE;
