@@ -18,8 +18,8 @@ public class OrderBookRedisRepository {
     private final RedisTemplate<String, OrderBook> redisTemplate;
 
     private static final String ORDER_BOOK_KEY_PREFIX = "orderbook:";
-    @Value("${spring.kafka.bootstrap-servers}")
-    private static int ttl_hours;
+    @Value("${matching-engine.snapshot.ttl-hours}")
+    private int ttl_hours;
 
     public void saveOrderBook(Long instrumentId, OrderBook orderBook) {
         String key = ORDER_BOOK_KEY_PREFIX + instrumentId;
