@@ -37,7 +37,6 @@
             <url>https://packages.confluent.io/maven/</url>
         </repository>
     </repositories>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
