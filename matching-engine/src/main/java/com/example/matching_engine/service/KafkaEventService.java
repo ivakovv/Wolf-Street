@@ -19,7 +19,7 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class KafkaEventService {
     @Value("${spring.kafka.topic.deal-topic}")
-    private final String dealTopic;
+    private String dealTopic;
     private final KafkaTemplate<String, DealMessages.DealEvent> kafkaTemplate;
 
     @Async

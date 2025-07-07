@@ -57,6 +57,14 @@ public class OrderBookRedisRepository {
         return redisTemplate.keys(ORDER_BOOK_KEY_PREFIX + "*");
     }
 
+    public Long getNextDealId() {
+        Long id = redisTemplate.opsForValue().increment("deal:lastId");
+        if (id == null) {
+            throw new IllegalStateException("Не удалось получить новый dealId из Redis");
+        }
+        return id;
+    }
+
     public void deleteOrderBook(Long instrumentId) {
         String key = ORDER_BOOK_KEY_PREFIX + instrumentId;
         redisTemplate.delete(key);

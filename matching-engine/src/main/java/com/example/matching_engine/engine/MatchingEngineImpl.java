@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 import com.example.matching_engine.repository.OrderBookRedisRepository;
 import jakarta.annotation.PostConstruct;
@@ -25,7 +24,6 @@ import com.example.matching_engine.engine.interfaces.MatchingEngine;
 public class MatchingEngineImpl implements MatchingEngine {
     private final OrderBookRedisRepository orderBookRedisRepository;
     private final ConcurrentHashMap<Long, OrderBook> orderBooks = new ConcurrentHashMap<>();
-    private final AtomicLong dealIdGenerator = new AtomicLong(1);
 
     @PostConstruct
     public void init(){
@@ -104,7 +102,7 @@ public class MatchingEngineImpl implements MatchingEngine {
     private Deal createDeal(Order incomingOrder, Order counterOrder, long count, BigDecimal price) {
         Order buyOrder = incomingOrder.type() == OrderType.BUY ? incomingOrder : counterOrder;
         Order saleOrder = incomingOrder.type() == OrderType.SALE ? incomingOrder : counterOrder;
-        Long dealId = dealIdGenerator.getAndIncrement();
+        Long dealId = orderBookRedisRepository.getNextDealId();
         return new Deal(dealId,
                 buyOrder.orderId(),
                 saleOrder.orderId(),
