@@ -54,12 +54,18 @@ public class MatchingEngineImpl implements MatchingEngine {
 
     private void matchOrder(Order order, OrderBook orderBook, List<Deal> deals) {
         long remains = order.count();
+        List<Order> skippedOrders = new ArrayList<>();
         while (remains > 0) {
             Optional<Order> bestOrderOpt = getBestOrder(order, orderBook);
             if (bestOrderOpt.isEmpty()) {
                 break;
             }
             Order bestOrder = bestOrderOpt.get();
+            if(order.portfolioId().equals(bestOrder.portfolioId())){
+                pollBestOrder(order, orderBook);
+                skippedOrders.add(bestOrder);
+                continue;
+            }
             if (!isPriceMatch(order, bestOrder)) {
                 break;
             }
@@ -72,6 +78,9 @@ public class MatchingEngineImpl implements MatchingEngine {
             if (orderQuantityRemaining > 0) {
                 orderBook.addOrder(bestOrder.withCount(orderQuantityRemaining));
             }
+        }
+        for (Order skipped : skippedOrders) {
+            orderBook.addOrder(skipped);
         }
         if (remains > 0) {
             orderBook.addOrder(order.withCount(remains));
@@ -98,7 +107,7 @@ public class MatchingEngineImpl implements MatchingEngine {
             case SALE -> incoming.lotPrice().compareTo(counter.lotPrice()) <= 0;
         };
     }
-    
+
     private Deal createDeal(Order incomingOrder, Order counterOrder, long count, BigDecimal price) {
         Order buyOrder = incomingOrder.type() == OrderType.BUY ? incomingOrder : counterOrder;
         Order saleOrder = incomingOrder.type() == OrderType.SALE ? incomingOrder : counterOrder;
@@ -110,7 +119,8 @@ public class MatchingEngineImpl implements MatchingEngine {
                 saleOrder.portfolioId(),
                 buyOrder.instrumentId(),
                 count,
-                price
+                price,
+                buyOrder.lotPrice()
         );
     }
 

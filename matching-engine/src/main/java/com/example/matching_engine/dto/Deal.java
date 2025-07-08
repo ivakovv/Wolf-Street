@@ -9,5 +9,6 @@ public record Deal(Long dealId,
                    Long salePortfolioId,
                    Long instrumentId,
                    Long count,
-                   BigDecimal lotPrice) {
+                   BigDecimal lotPrice,
+                   BigDecimal buyOrderPrice) {
 }

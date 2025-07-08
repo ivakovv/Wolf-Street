@@ -3,7 +3,7 @@ package com.example.matching_engine.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.aws.protobuf.DealMessages;
+import com.aws.protobuf.OrderMessages;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,19 +34,19 @@ public class KafkaConsumerConfig {
         config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
         config.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
         config.put(KafkaProtobufDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
-        config.put(KafkaProtobufDeserializerConfig.SPECIFIC_PROTOBUF_VALUE_TYPE, DealMessages.DealExecutedEvent.class);
+        config.put(KafkaProtobufDeserializerConfig.SPECIFIC_PROTOBUF_VALUE_TYPE, OrderMessages.OrderEvent.class);
         return config;
     }
 
     @Bean
-    public ConsumerFactory<String, DealMessages.DealExecutedEvent> consumerFactory() {
+    public ConsumerFactory<String, OrderMessages.OrderEvent> consumerFactory() {
         return new DefaultKafkaConsumerFactory<>(consumerConfig());
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, DealMessages.DealExecutedEvent> kafkaListenerContainerFactory
-            (final ConsumerFactory<String, DealMessages.DealExecutedEvent> consumerFactory) {
-        final ConcurrentKafkaListenerContainerFactory<String, DealMessages.DealExecutedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    public ConcurrentKafkaListenerContainerFactory<String, OrderMessages.OrderEvent> kafkaListenerContainerFactory
+            (final ConsumerFactory<String, OrderMessages.OrderEvent> consumerFactory) {
+        final ConcurrentKafkaListenerContainerFactory<String, OrderMessages.OrderEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.BATCH);
         factory.setConsumerFactory(consumerFactory);
         return factory;

@@ -33,6 +33,7 @@ public class KafkaEventService {
                 .setSalePortfolioId(deal.salePortfolioId())
                 .setCount(deal.count())
                 .setLotPrice(deal.lotPrice().toString())
+                .setBuyOrderPrice(deal.buyOrderPrice().toString())
                 .setInstrumentId(deal.instrumentId())
                 .build();
         DealMessages.DealEvent message = DealMessages.DealEvent.newBuilder()

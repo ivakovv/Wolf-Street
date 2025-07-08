@@ -23,7 +23,8 @@ message DealExecutedEvent {
   int64 sale_portfolio_id = 5;
   int64 count = 6;
   string lot_price = 7;
-  int64 instrument_id = 8;
+  string buy_order_price = 8;
+  int64 instrument_id = 9;
 }
 
 message DealCancelledEvent {
