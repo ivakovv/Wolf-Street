@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class DealEventListener {
     private final PortfolioValidationService portfolioValidationService;
-    @KafkaListener(topics = "trades", groupId = "executed-deal-group", containerFactory = "dealKafkaListenerContainerFactory")
+    @KafkaListener(topics = "deals", groupId = "executed-deal-group", containerFactory = "dealKafkaListenerContainerFactory")
     public void dealExecutedHandler(
             @Payload DealMessages.DealEvent request,
             @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
@@ -32,7 +32,8 @@ public class DealEventListener {
                         dealExecutedEvent.getSalePortfolioId(),
                         dealExecutedEvent.getInstrumentId(),
                         dealExecutedEvent.getCount(),
-                        new BigDecimal(dealExecutedEvent.getLotPrice()));
+                        new BigDecimal(dealExecutedEvent.getLotPrice()),
+                        new BigDecimal(dealExecutedEvent.getBuyOrderPrice()));
             }
             case DEAL_CANCELLED -> {
                 log.info("processing cancelled deal...");

@@ -45,10 +45,10 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
     @Override
     @Transactional
     public void processExecutedDeal(
-            Long portfolioBuyId, Long portfolioSaleId, Long instrumentId, Long count, BigDecimal lotPrice) {
+            Long portfolioBuyId, Long portfolioSaleId, Long instrumentId, Long count, BigDecimal lotPrice, BigDecimal buyOrderPrice) {
         try {
             processDealForSaleSide(portfolioSaleId, instrumentId, count, lotPrice);
-            processDealForBuySide(portfolioBuyId, instrumentId, count, lotPrice);
+            processDealForBuySide(portfolioBuyId, instrumentId, count, lotPrice, buyOrderPrice);
         } catch (Exception e) {
             log.error("process executed Deal failed: {}", e.getMessage());
         }
@@ -106,9 +106,10 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
         updateBlockedInstrument(portfolio, instrumentId, -count);
     }
 
-    private void processDealForBuySide(Long portfolioBuyId, Long instrumentId, Long count, BigDecimal lotPrice) {
+    private void processDealForBuySide(Long portfolioBuyId, Long instrumentId, Long count, BigDecimal lotPrice, BigDecimal buyOrderPrice) {
         Portfolio portfolio = getUserPortfolio(portfolioBuyId);
-        updateBlockedCash(portfolio, lotPrice.multiply(new BigDecimal(count)).negate());
+        updateAvailableCash(portfolio, new BigDecimal(count).multiply(buyOrderPrice.subtract(lotPrice)));
+        updateBlockedCash(portfolio, buyOrderPrice.multiply(new BigDecimal(count)).negate());
         updateAvailableInstrument(portfolio, instrumentId, count);
     }
 
