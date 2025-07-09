@@ -1,0 +1,4 @@
+syntax = "proto3";
+package com.aws.protobuf;
+option java_outer_classname = "InstrumentMessages";
+

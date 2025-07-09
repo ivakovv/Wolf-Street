@@ -32,8 +32,12 @@ public class InstrumentServiceImpl implements InstrumentService {
     @Override
     public Instrument createInstrument(CreateInstrumentRequestDto request) {
         instrumentRepository.findByTitle(request.title()).ifPresent(instrument -> {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Инструмент уже существует");
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Инструмент с таким названием уже существует");
                 });
+
+        instrumentRepository.findByTicker(request.ticker()).ifPresent(instrument -> {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Инструмент с таким тикером уже существует");
+        });
 
         Instrument instrument = new Instrument();
 
@@ -51,6 +55,17 @@ public class InstrumentServiceImpl implements InstrumentService {
                         HttpStatus.NOT_FOUND,
                         String.format("Инструмент с ID %d не найден", request.instrumentId())
                 ));
+        if (instrument.getTicker().equals(request.ticker())){
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    String.format("Инструмент с тикером %s уже существует", instrument.getTicker()));
+        }
+
+        if (instrument.getTitle().equals(request.title())){
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    String.format("Инструмент с названием %s уже существует", instrument.getTitle()));
+        }
 
         Optional.ofNullable(request.ticker()).ifPresent(instrument::setTicker);
         Optional.ofNullable(request.title()).ifPresent(instrument::setTitle);
