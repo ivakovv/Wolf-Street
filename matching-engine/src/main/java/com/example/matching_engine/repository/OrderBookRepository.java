@@ -16,11 +16,13 @@ public interface OrderBookRepository extends JpaRepository<Order, Long> {
               AND lot_price <= :lotPrice AND order_status != 'CANCELLED' AND order_status != 'EXECUTED'
             ORDER BY lot_price ASC, created_at ASC
             FOR UPDATE SKIP LOCKED
+            LIMIT :limitFetch
             """, nativeQuery = true)
     List<Order> findSellOrdersForBuy(
             @Param("portfolioId") Long portfolioId,
             @Param("instrumentId") Long instrumentId,
-            @Param("lotPrice") BigDecimal lotPrice);
+            @Param("lotPrice") BigDecimal lotPrice,
+            @Param("limitFetch") int limitFetch);
 
     @Query(value = """
             SELECT * FROM order_book
@@ -28,11 +30,12 @@ public interface OrderBookRepository extends JpaRepository<Order, Long> {
                  AND lot_price >= :lotPrice AND order_status != 'CANCELLED' AND order_status != 'EXECUTED'
             ORDER BY lot_price DESC, created_at ASC
             FOR UPDATE SKIP LOCKED
+            LIMIT :limitFetch
             """, nativeQuery = true)
     List<Order> findBuyOrdersForSell(
             @Param("portfolioId") Long portfolioId,
             @Param("instrumentId") Long instrumentId,
-            @Param("lotPrice") BigDecimal lotPrice
-    );
+            @Param("lotPrice") BigDecimal lotPrice,
+            @Param("limitFetch") int limitFetch);
 
 }

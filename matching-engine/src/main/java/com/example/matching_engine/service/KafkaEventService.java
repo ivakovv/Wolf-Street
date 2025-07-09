@@ -26,7 +26,6 @@ public class KafkaEventService {
     @EventListener
     public void handleDealExecutedEvent(Deal deal){
         DealMessages.DealExecutedEvent executedEvent = DealMessages.DealExecutedEvent.newBuilder()
-                .setDealId(deal.dealId())
                 .setBuyOrderId(deal.buyOrderId())
                 .setSaleOrderId(deal.saleOrderId())
                 .setBuyPortfolioId(deal.buyPortfolioId())
