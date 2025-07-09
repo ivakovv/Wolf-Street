@@ -1,0 +1,3 @@
+databaseChangeLog:
+  - include:
+      file: classpath:/db/changelog/changeset/create-order-table.sql
