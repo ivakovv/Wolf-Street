@@ -1,5 +1,7 @@
 server:
   port: 8083
+  servlet:
+    context-path: /portfolio-service
 spring:
   application:
     name: portfolio-service

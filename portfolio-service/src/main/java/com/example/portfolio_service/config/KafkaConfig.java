@@ -31,7 +31,7 @@ public class KafkaConfig {
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer);
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaProtobufDeserializer.class);
-        config.put(ConsumerConfig.GROUP_ID_CONFIG, "user-created-group");
+        config.put(ConsumerConfig.GROUP_ID_CONFIG, "portfolio-service-user-created-group");
         config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
         config.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
         config.put(KafkaProtobufDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
@@ -59,7 +59,7 @@ public class KafkaConfig {
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer);
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaProtobufDeserializer.class);
-        config.put(ConsumerConfig.GROUP_ID_CONFIG, "executed-deal-group");
+        config.put(ConsumerConfig.GROUP_ID_CONFIG, "portfolio-service-executed-deal-group");
         config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
         config.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
         config.put(KafkaProtobufDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
@@ -80,5 +80,4 @@ public class KafkaConfig {
         factory.setConsumerFactory(consumerFactory);
         return factory;
     }
-
 }
