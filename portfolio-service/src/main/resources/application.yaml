@@ -1,12 +1,12 @@
 server:
-  port: 8080
+  port: 8083
   servlet:
-    context-path: /user-service
+    context-path: /portfolio-service
 spring:
   application:
-    name: user-service
+    name: portfolio-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/user_service
+    url: jdbc:postgresql://localhost:5432/portfolio_service
     username: postgres
     password: 123456
     driverClassName: org.postgresql.Driver
@@ -20,6 +20,7 @@ spring:
     change-log: classpath:/db/changelog/db.changelog-master.yaml
   kafka:
     bootstrap-servers: localhost:9092
+    schema-registry-url: http://localhost:8081
     admin:
       fail-fast: false
       properties:
@@ -28,6 +29,14 @@ spring:
         transaction.state.log.min.isr: 1
     topic:
       user-created: user-created
+grpc:
+  server:
+    port: 6565
+  client:
+    analytic-service:
+      address: static://localhost:6567
+      enable-keep-alive: true
+      negotiation-type: plaintext
 security:
   jwt:
     secret_key: dXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3M=

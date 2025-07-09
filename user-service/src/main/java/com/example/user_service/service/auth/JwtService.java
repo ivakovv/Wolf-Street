@@ -76,10 +76,6 @@ public class JwtService {
         return resolver.apply(claims);
     }
 
-    public String extractUsername(String token) {
-        return extractClaim(token, claims -> claims.get("name", String.class));
-    }
-
     public String extractUserId(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -99,7 +95,6 @@ public class JwtService {
 
     public boolean isValid(String token) {
         try {
-            extractAllClaims(token);
             if (isAccessTokenExpired(token)) {
                 log.info("Token has expired");
                 return false;

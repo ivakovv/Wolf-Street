@@ -1,0 +1,31 @@
+syntax = "proto3";
+package com.aws.protobuf;
+import "google/protobuf/timestamp.proto";
+
+option java_outer_classname = "AnalyticServiceProto";
+
+service AnalyticService {
+  rpc getPortfolioHistory (PortfolioHistoryRequest) returns (PortfolioHistoryResponse);
+}
+
+
+message PortfolioHistoryRequest {
+  int64 portfolio_id = 1;
+}
+
+message PortfolioHistoryResponse {
+  repeated Deal deals = 1;
+}
+
+message Deal {
+  enum DealType {
+    BUY = 0;
+    SELL = 1;
+  }
+  int64 deal_id = 1;
+  DealType deal_type = 2;
+  google.protobuf.Timestamp timestamp = 3;
+  int64 instrument_id = 4;
+  int64 count = 5;
+  string lot_price = 6;
+}

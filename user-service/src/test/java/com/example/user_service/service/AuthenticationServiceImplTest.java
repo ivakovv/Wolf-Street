@@ -187,7 +187,7 @@ class AuthenticationServiceImplTest {
         //Given
         when(jwtService.extractUserId(VALID_REFRESH_TOKEN)).thenReturn("1");
         when(userService.loadUserById(1L)).thenReturn(testUser);
-        when(jwtService.isValidRefresh(VALID_REFRESH_TOKEN, testUser)).thenReturn(true);
+        when(jwtService.isValidRefresh(VALID_REFRESH_TOKEN)).thenReturn(true);
         when(jwtService.generateAccessToken(testUser)).thenReturn(NEW_ACCESS_TOKEN);
         when(jwtService.generateRefreshToken(testUser)).thenReturn(NEW_REFRESH_TOKEN);
         MockHttpServletRequest request = new MockHttpServletRequest();
@@ -221,7 +221,7 @@ class AuthenticationServiceImplTest {
         //Given
         when(jwtService.extractUserId(VALID_REFRESH_TOKEN)).thenReturn("1");
         when(userService.loadUserById(1L)).thenReturn(testUser);
-        when(jwtService.isValidRefresh(VALID_REFRESH_TOKEN, testUser)).thenReturn(false);
+        when(jwtService.isValidRefresh(VALID_REFRESH_TOKEN)).thenReturn(false);
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + VALID_REFRESH_TOKEN);

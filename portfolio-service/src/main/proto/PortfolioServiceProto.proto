@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package com.aws.protobuf;
+option java_outer_classname = "PortfolioServiceProto";
+
+service Portfolio {
+  rpc isValidPortfolioForSale (OrderSaleRequest) returns (PortfolioResponse){}
+  rpc isValidPortfolioForBuy (OrderBuyRequest) returns (PortfolioResponse){}
+}
+
+message OrderSaleRequest {
+  int64 user_id = 1;
+  int64 portfolio_id = 2;
+  int64 instrument_id = 3;
+  int64 count = 4;
+}
+
+message OrderBuyRequest {
+  int64 user_id = 1;
+  int64 portfolio_id = 2;
+  string total = 3;
+}
+
+message PortfolioResponse {
+  bool is_valid = 1;
+  string description = 2;
+}
