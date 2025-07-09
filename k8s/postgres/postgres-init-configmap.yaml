@@ -7,3 +7,4 @@ data:
     CREATE DATABASE user_service;
     CREATE DATABASE order_service;
     CREATE DATABASE portfolio_service;
+    CREATE DATABASE matching_engine;

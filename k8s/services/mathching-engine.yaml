@@ -15,12 +15,10 @@ kind: ConfigMap
 metadata:
   name: matching-engine-configmap
 data:
+  SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-service:5432/matching_engine
   SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-service:9092
   SPRING_KAFKA_PROPERTIES_SCHEMA_REGISTRY_URL: http://schema-registry-service:8081
   SPRING_APPLICATION_NAME: matching-engine
-  SPRING_REDIS_HOST: redis-service
-  SPRING_REDIS_PORT: '6379'
-  SPRING_REDIS_TIMEOUT: '2000'
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -46,3 +44,15 @@ spec:
                 name: matching-engine-configmap
             - secretRef:
                 name: jwt-secret
+          env:
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+
