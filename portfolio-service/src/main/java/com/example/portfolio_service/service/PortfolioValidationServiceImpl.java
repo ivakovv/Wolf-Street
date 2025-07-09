@@ -25,6 +25,7 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
     private final PortfolioCashRepository portfolioCashRepository;
 
     @Override
+    @Transactional
     public boolean validateAndBlockForSale(Long userId, Long portfolioId, Long instrumentId, Long count) {
         log.info("validating portfolio: {} for sale instrument: {} in count: {}", portfolioId, instrumentId, count);
         return findUserPortfolio(portfolioId)
@@ -34,6 +35,7 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
     }
 
     @Override
+    @Transactional
     public boolean validateAndBlockForBuy(Long userId, Long portfolioId, String total) {
         log.info("validating portfolio: {} for buy on total: {}", portfolioId, total);
         return findUserPortfolio(portfolioId)
@@ -118,11 +120,11 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
     }
 
     private Optional<PortfolioInstruments> findInstrument(Portfolio portfolio, Long instrumentId) {
-        return portfolioInstrumentsRepository.findByPortfolioAndInstrumentId(portfolio, instrumentId);
+        return portfolioInstrumentsRepository.findForUpdateByPortfolioAndInstrumentId(portfolio, instrumentId);
     }
 
     private Optional<PortfolioCash> findCash(Portfolio portfolio) {
-        return portfolioCashRepository.findByPortfolioAndCurrency(portfolio, "RUB");
+        return portfolioCashRepository.findForUpdateByPortfolioAndCurrency(portfolio, "RUB");
     }
 
     private Portfolio getUserPortfolio(Long portfolioId) {
