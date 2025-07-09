@@ -1,27 +1,28 @@
 package com.example.matching_engine.mapper;
 
 import com.aws.protobuf.OrderMessages;
-import com.example.matching_engine.dto.Order;
 import com.example.matching_engine.dto.enums.OrderStatus;
 import com.example.matching_engine.dto.enums.OrderType;
+import com.example.matching_engine.entity.Order;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", imports = {BigDecimal.class})
 public interface MapperToOrderFromEvent {
-    @Mapping(target = "orderId", source = "orderId")
+    @Mapping(target = "id", source = "orderId")
     @Mapping(target = "userId", source = "userId")
     @Mapping(target = "portfolioId", source = "portfolioId")
     @Mapping(target = "instrumentId", source = "instrumentId")
     @Mapping(target = "count", source = "count")
     @Mapping(target = "lotPrice", expression = "java(new BigDecimal(orderCreatedEvent.getLotPrice()))")
-    @Mapping(target = "type", source = "type", qualifiedByName = "mapOrderType")
-    @Mapping(target = "status", source = "status", qualifiedByName = "mapOrderStatus")
+    @Mapping(target = "orderType", source = "type", qualifiedByName = "mapOrderType")
+    @Mapping(target = "orderStatus", source = "status", qualifiedByName = "mapOrderStatus")
     @Mapping(target = "createdAt", expression = "java(toOffsetDateTime(orderCreatedEvent.getCreatedAt()))")
     Order mapToOrderFromEvent(OrderMessages.OrderCreatedEvent orderCreatedEvent);
     default OffsetDateTime toOffsetDateTime(com.google.protobuf.Timestamp timestamp) {

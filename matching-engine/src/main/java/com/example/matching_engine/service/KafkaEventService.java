@@ -2,7 +2,7 @@ package com.example.matching_engine.service;
 
 import com.aws.protobuf.DealMessages;
 import com.example.matching_engine.dto.Deal;
-import com.example.matching_engine.dto.Order;
+import com.example.matching_engine.entity.Order;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,12 +46,12 @@ public class KafkaEventService {
     @EventListener
     public void handleDealCancelledEvent(Order order){
         DealMessages.DealCancelledEvent cancelledEvent = DealMessages.DealCancelledEvent.newBuilder()
-                .setOrderId(order.orderId())
-                .setPortfolioId(order.portfolioId())
-                .setCount(order.count())
-                .setLotPrice(order.lotPrice().toString())
-                .setInstrumentId(order.instrumentId())
-                .setOrderType(DealMessages.OrderType.valueOf(order.type().name()))
+                .setOrderId(order.getId())
+                .setPortfolioId(order.getPortfolioId())
+                .setCount(order.getCount())
+                .setLotPrice(order.getLotPrice().toString())
+                .setInstrumentId(order.getInstrumentId())
+                .setOrderType(DealMessages.OrderType.valueOf(order.getOrderType().name()))
                 .build();
         DealMessages.DealEvent message = DealMessages.DealEvent.newBuilder()
                 .setDealCancelled(cancelledEvent)

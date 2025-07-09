@@ -1,6 +1,21 @@
+server:
+  port: 8087
 spring:
   application:
     name: matching-engine
+  datasource:
+    url: jdbc:postgresql://localhost:5432/matching_engine
+    username: postgres
+    password: 123456
+    driverClassName: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: true
+    show-sql: true
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
   kafka:
     bootstrap-servers: localhost:9092
     schema-registry-url: http://localhost:8081
@@ -12,25 +27,4 @@ spring:
         transaction.state.log.min.isr: 1
     topic:
       deal-topic: deals
-  grpc:
-    client:
-      portfolio-service:
-        address: static://localhost:6565
-        enable-keep-alive: true
-        negotiation-type: plaintext
-  redis:
-    host: localhost
-    port: 6379
-    timeout: 2000ms
-    jedis:
-      pool:
-        max-active: 8
-        max-idle: 8
-        min-idle: 0
-        max-wait: -1ms
-
-matching-engine:
-  snapshot:
-    ttl-hours: 24
-
 
