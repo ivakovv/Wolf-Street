@@ -54,12 +54,6 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
         } catch (Exception e) {
             log.error("process executed Deal failed: {}", e.getMessage());
         }
-
-        try{
-            System.out.println();
-        } catch (OutOfMemoryError error){
-            log.error("dfd");
-        }
     }
 
     @Override
