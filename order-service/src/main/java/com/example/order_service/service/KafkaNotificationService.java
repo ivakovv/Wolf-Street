@@ -23,7 +23,7 @@ public class KafkaNotificationService {
 
     public void sendOrderCreatedEvent(Order order) {
         try {
-            OrderMessages.OrderCreatedEvent message = OrderMessages.OrderCreatedEvent
+            OrderMessages.OrderCreatedEvent createdEvent = OrderMessages.OrderCreatedEvent
                     .newBuilder()
                     .setOrderId(order.getOrderId())
                     .setUserId(order.getUserId())
@@ -35,6 +35,11 @@ public class KafkaNotificationService {
                     .setStatus(order.getStatus().getProtoStatus())
                     .setCreatedAt(buildTimestamp(order.getCreatedAt()))
                     .build();
+
+            OrderMessages.OrderEvent message = OrderMessages.OrderEvent
+                            .newBuilder()
+                            .setOrderCreated(createdEvent)
+                            .build();
                     
             kafkaTemplate.send(ORDERS_TOPIC, message);
         } catch (Exception e) {
@@ -45,7 +50,7 @@ public class KafkaNotificationService {
 
     public void sendOrderUpdatedEvent(Order order) {
         try {
-            OrderMessages.OrderUpdatedEvent message = OrderMessages.OrderUpdatedEvent
+            OrderMessages.OrderUpdatedEvent updatedEvent = OrderMessages.OrderUpdatedEvent
                     .newBuilder()
                     .setOrderId(order.getOrderId())
                     .setUserId(order.getUserId())
@@ -60,7 +65,12 @@ public class KafkaNotificationService {
                     .setCreatedAt(buildTimestamp(order.getCreatedAt()))
                     .setUpdatedAt(buildTimestamp(order.getUpdatedAt()))
                     .build();
-                    
+
+            OrderMessages.OrderEvent message = OrderMessages.OrderEvent
+                    .newBuilder()
+                    .setOrderUpdated(updatedEvent)
+                    .build();
+
             kafkaTemplate.send(ORDERS_TOPIC, message);
         } catch (Exception e) {
             log.error("Не удалось отправить сообщение об обновлении заявки orderId={}: {}", 
@@ -72,7 +82,6 @@ public class KafkaNotificationService {
         try {
             DealMessages.DealErrorEvent message = DealMessages.DealErrorEvent
                     .newBuilder()
-                    .setDealId(deal.getDealId())
                     .setBuyOrderId(deal.getBuyOrderId())
                     .setSaleOrderId(deal.getSaleOrderId())
                     .setBuyPortfolioId(deal.getBuyPortfolioId())
@@ -83,8 +92,8 @@ public class KafkaNotificationService {
                     
             kafkaTemplate.send("deals-errors", message);
         } catch (Exception e) {
-            log.error("Не удалось отправить сообщение об ошибке сделки dealId={}: {}", 
-                deal.getDealId(), e.getMessage(), e);
+            log.error("Не удалось отправить сообщение об ошибке сделки: {}",
+                e.getMessage(), e);
         }
     }
 

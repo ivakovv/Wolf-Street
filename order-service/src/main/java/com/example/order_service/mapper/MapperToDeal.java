@@ -9,8 +9,6 @@ import java.math.BigDecimal;
 
 @Mapper(componentModel = "spring")
 public interface MapperToDeal {
-    
-    @Mapping(expression = "java(message.getDealId())", target = "dealId")
     @Mapping(expression = "java(message.getBuyOrderId())", target = "buyOrderId")
     @Mapping(expression = "java(message.getSaleOrderId())", target = "saleOrderId")
     @Mapping(expression = "java(message.getBuyPortfolioId())", target = "buyPortfolioId")

@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 public class Deal {
-    private Long dealId;
     private Long buyOrderId;
     private Long saleOrderId;
     private Long buyPortfolioId;

@@ -99,7 +99,7 @@ public class OrderService {
 
 
         } catch (Exception e) {
-            log.error("Ошибка при обработке сделки dealId={}: {}", deal.getDealId(), e.getMessage(), e);
+            log.error("Ошибка при обработке сделки : {}", e.getMessage(), e);
 
             kafkaNotificationService.sendErrorDealMessage(deal,
                     "Ошибка обработки сделки: " + e.getMessage());

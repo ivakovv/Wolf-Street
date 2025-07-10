@@ -7,9 +7,11 @@ import com.example.order_service.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -21,8 +23,16 @@ public class KafkaConsumer {
     private final MapperToDeal mapperToDeal;
 
     @KafkaListener(topics = "deals", groupId = "group_id")
-    public void consume(DealMessages.DealExecutedEvent message) {
-        Deal deal = mapperToDeal.mapToDeal(message);
-        orderService.processDeal(deal);
+    public void consume(@Payload DealMessages.DealEvent event, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+        switch (event.getEventCase()) {
+            case DEAL_EXECUTED -> {
+                DealMessages.DealExecutedEvent dealExecutedEvent = event.getDealExecuted();
+
+                Deal deal = mapperToDeal.mapToDeal(dealExecutedEvent);
+                orderService.processDeal(deal);
+            }
+            case EVENT_NOT_SET -> log.warn("Получено OrderEvent без события");
+            default -> log.error("Неизвестный тип события: {}", event.getEventCase());
+        }
     }
 }
