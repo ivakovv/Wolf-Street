@@ -82,7 +82,6 @@ public class KafkaNotificationService {
         try {
             DealMessages.DealErrorEvent message = DealMessages.DealErrorEvent
                     .newBuilder()
-                    .setDealId(deal.getDealId())
                     .setBuyOrderId(deal.getBuyOrderId())
                     .setSaleOrderId(deal.getSaleOrderId())
                     .setBuyPortfolioId(deal.getBuyPortfolioId())
@@ -93,8 +92,8 @@ public class KafkaNotificationService {
                     
             kafkaTemplate.send("deals-errors", message);
         } catch (Exception e) {
-            log.error("Не удалось отправить сообщение об ошибке сделки dealId={}: {}", 
-                deal.getDealId(), e.getMessage(), e);
+            log.error("Не удалось отправить сообщение об ошибке сделки: {}",
+                e.getMessage(), e);
         }
     }
 
