@@ -24,6 +24,12 @@ spring:
         transaction.state.log.min.isr: 1
     topic:
       user-created: user-created
+s3:
+  key_id: ${S3_KEY_ID}
+  secret_key: ${S3_SECRET_KEY}
+  region: ru-central1
+  endpoint: https://storage.yandexcloud.net
+  bucket: wolfstreet
 security:
   jwt:
     secret_key: dXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3M=
