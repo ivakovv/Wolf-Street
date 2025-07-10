@@ -25,11 +25,13 @@ public class RedisOrderBookServiceImpl implements RedisOrderBookService {
         String key = getRedisKey(order.instrumentId(), order.type());
         OrderBookEntry entry = new OrderBookEntry(order.orderId(), order.count(), Double.parseDouble(order.lotPrice().toString()), order.portfolioId());
         redisTemplate.opsForZSet().add(key, entry, entry.price());
+        redisTemplate.opsForHash().put("orderbook:orderIdIndex", order.orderId().toString(), key);
     }
 
     @Override
-    public void removeFromOrderBook(Long orderId) {
-
+    public void removeFromOrderBook(OrderBookEntry orderBookEntry, OrderType orderType, Long instrumentId) {
+        String redisKey = getRedisKey(instrumentId, orderType);
+        redisTemplate.opsForZSet().remove(redisKey, orderBookEntry);
     }
 
     @Override
@@ -45,6 +47,20 @@ public class RedisOrderBookServiceImpl implements RedisOrderBookService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Order book for instrument with id: %d doesn't exists", instrumentId));
         }
         return orderBookEntries.stream().toList();
+    }
+
+    @Override
+    public OrderBookEntry getBestBid(Long instrumentId) {
+        String key = getRedisKey(instrumentId, OrderType.BUY);
+        Set<OrderBookEntry> top = redisTemplate.opsForZSet().reverseRange(key, 0, 0);
+        return top != null && !top.isEmpty() ? top.iterator().next() : null;
+    }
+
+    @Override
+    public OrderBookEntry getBestAsk(Long instrumentId) {
+        String key = getRedisKey(instrumentId, OrderType.SALE);
+        Set<OrderBookEntry> top = redisTemplate.opsForZSet().range(key, 0, 0);
+        return top != null && !top.isEmpty() ? top.iterator().next() : null;
     }
 
     private String getRedisKey(Long instrumentId, OrderType orderType) {

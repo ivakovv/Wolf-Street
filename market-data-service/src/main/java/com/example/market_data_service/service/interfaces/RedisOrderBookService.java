@@ -8,6 +8,8 @@ import java.util.List;
 
 public interface RedisOrderBookService {
     void addToOrderBook(Order order);
-    void removeFromOrderBook(Long orderId);
+    void removeFromOrderBook(OrderBookEntry orderBookEntry, OrderType orderType, Long instrumentId);
     List<OrderBookEntry> getTopNOrders(OrderType orderType, Long instrumentId, Long ordersLimit);
+    OrderBookEntry getBestBid(Long instrumentId);
+    OrderBookEntry getBestAsk(Long instrumentId);
 }

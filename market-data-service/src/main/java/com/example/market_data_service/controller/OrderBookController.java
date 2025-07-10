@@ -2,6 +2,7 @@ package com.example.market_data_service.controller;
 
 import com.example.market_data_service.dto.orderbook.OrderBookAggregatedResponse;
 import com.example.market_data_service.dto.orderbook.OrderBookResponse;
+import com.example.market_data_service.dto.orderbook.SpreadResponse;
 import com.example.market_data_service.service.interfaces.OrderBookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,5 +25,9 @@ public class OrderBookController{
     @GetMapping("/{instrumentId}/aggregated")
     public ResponseEntity<OrderBookAggregatedResponse> getAggregatedOrderBook(@PathVariable Long instrumentId, @RequestParam Long limitLevels){
         return ResponseEntity.ok(orderBookService.getAggregatedOrderBook(instrumentId, limitLevels));
+    }
+    @GetMapping("/{instrumentId}/spread")
+    public ResponseEntity<SpreadResponse> getSpread(@PathVariable Long instrumentId){
+        return ResponseEntity.ok(orderBookService.getSpread(instrumentId));
     }
 }

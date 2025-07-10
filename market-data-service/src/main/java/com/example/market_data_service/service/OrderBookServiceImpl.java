@@ -5,12 +5,14 @@ import com.example.market_data_service.dto.orderbook.AggregatedOrderBookLevel;
 import com.example.market_data_service.dto.orderbook.OrderBookAggregatedResponse;
 import com.example.market_data_service.dto.orderbook.OrderBookEntry;
 import com.example.market_data_service.dto.orderbook.OrderBookResponse;
+import com.example.market_data_service.dto.orderbook.SpreadResponse;
 import com.example.market_data_service.service.interfaces.OrderBookService;
 import com.example.market_data_service.service.interfaces.RedisOrderBookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,6 +38,15 @@ public class OrderBookServiceImpl implements OrderBookService {
         return new OrderBookAggregatedResponse(instrumentId,
                 getAgregatedList(mappedBids, limitLevels, OrderType.BUY),
                 getAgregatedList(mappedAsks, limitLevels, OrderType.SALE));
+    }
+
+    @Override
+    public SpreadResponse getSpread(Long instrumentId) {
+        BigDecimal bestBid = BigDecimal.valueOf(redisOrderBookService.getBestBid(instrumentId).price());
+        BigDecimal bestAsk = BigDecimal.valueOf(redisOrderBookService.getBestAsk(instrumentId).price());
+        BigDecimal spread = bestAsk.subtract(bestBid);
+        BigDecimal midPrice = bestBid.add(bestAsk).divide(BigDecimal.valueOf(2), 10, RoundingMode.FLOOR);
+        return new SpreadResponse(instrumentId, bestBid, bestAsk, spread, midPrice);
     }
 
     private Map<Double, Long> groupByPrice(List<OrderBookEntry> orderBookEntries) {
