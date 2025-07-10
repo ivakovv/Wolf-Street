@@ -31,19 +31,24 @@ public class RedisOrderBookServiceImpl implements RedisOrderBookService {
     @Override
     public void removeFromOrderBook(OrderBookEntry orderBookEntry, OrderType orderType, Long instrumentId) {
         String redisKey = getRedisKey(instrumentId, orderType);
-        redisTemplate.opsForZSet().remove(redisKey, orderBookEntry);
+        Long deleted = redisTemplate.opsForZSet().remove(redisKey, orderBookEntry);
+        if (deleted != null && deleted > 0) {
+            log.info("Order from order book successfully deleted!");
+        } else {
+            log.error("Deleting order failed =(");
+        }
     }
 
     @Override
-    public List<OrderBookEntry> getTopNOrders(OrderType orderType, Long instrumentId, Long ordersLimit){
+    public List<OrderBookEntry> getTopNOrders(OrderType orderType, Long instrumentId, Long ordersLimit) {
         String key = getRedisKey(instrumentId, orderType);
         Set<OrderBookEntry> orderBookEntries;
-        switch (orderType){
+        switch (orderType) {
             case BUY -> orderBookEntries = redisTemplate.opsForZSet().reverseRange(key, 0, ordersLimit - 1);
             case SALE -> orderBookEntries = redisTemplate.opsForZSet().range(key, 0, ordersLimit - 1);
             default -> throw new IllegalArgumentException(String.format("Unknown order type: %s", orderType));
         }
-        if (orderBookEntries == null){
+        if (orderBookEntries == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Order book for instrument with id: %d doesn't exists", instrumentId));
         }
         return orderBookEntries.stream().toList();
