@@ -24,7 +24,18 @@ public interface MapperFromEventToOrder {
     @Mapping(target = "type", source = "type", qualifiedByName = "mapOrderType")
     @Mapping(target = "status", source = "status", qualifiedByName = "mapOrderStatus")
     @Mapping(target = "createdAt", expression = "java(toOffsetDateTime(orderCreatedEvent.getCreatedAt()))")
-    Order mapToOrderFromEvent(OrderMessages.OrderCreatedEvent orderCreatedEvent);
+    Order mapToOrderFromCreatedEvent(OrderMessages.OrderCreatedEvent orderCreatedEvent);
+
+    @Mapping(target = "orderId", source = "orderId")
+    @Mapping(target = "userId", source = "userId")
+    @Mapping(target = "portfolioId", source = "portfolioId")
+    @Mapping(target = "instrumentId", source = "instrumentId")
+    @Mapping(target = "count", source = "count")
+    @Mapping(target = "lotPrice", expression = "java(new BigDecimal(orderUpdatedEvent.getLotPrice()))")
+    @Mapping(target = "type", source = "type", qualifiedByName = "mapOrderType")
+    @Mapping(target = "status", source = "status", qualifiedByName = "mapOrderStatus")
+    @Mapping(target = "createdAt", expression = "java(toOffsetDateTime(orderUpdatedEvent.getCreatedAt()))")
+    Order mapToOrderFromUpdatedEvent(OrderMessages.OrderUpdatedEvent orderUpdatedEvent);
     default OffsetDateTime toOffsetDateTime(com.google.protobuf.Timestamp timestamp) {
         if (timestamp == null) {
             return null;

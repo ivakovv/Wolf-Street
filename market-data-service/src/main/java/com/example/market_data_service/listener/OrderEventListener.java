@@ -26,12 +26,17 @@ public class OrderEventListener {
             case ORDER_CREATED -> {
                 log.info("Processing created order...");
                 OrderMessages.OrderCreatedEvent orderCreatedEvent = request.getOrderCreated();
-                eventProcessor.processCreatedOrder(mapperFromEventToOrder.mapToOrderFromEvent(orderCreatedEvent));
+                eventProcessor.processCreatedOrder(mapperFromEventToOrder.mapToOrderFromCreatedEvent(orderCreatedEvent));
             }
             case ORDER_UPDATED -> {
-                log.info("Processing updated order...");
                 OrderMessages.OrderUpdatedEvent orderUpdatedEvent = request.getOrderUpdated();
-                eventProcessor.processCancelledOrder(orderUpdatedEvent.getOrderId());
+                if (orderUpdatedEvent.getStatus().equals(OrderMessages.OrderStatus.CANCELLED)){
+                    try{
+                        eventProcessor.processCancelledOrder(mapperFromEventToOrder.mapToOrderFromUpdatedEvent(orderUpdatedEvent));
+                    } catch (IllegalArgumentException e){
+                        log.error("Error while processing cancelled order: {}", e.getMessage());
+                    }
+                }
             }
             case EVENT_NOT_SET -> log.info("Received message without event");
             default -> log.error("Unknown event type: {}", request.getEventCase());

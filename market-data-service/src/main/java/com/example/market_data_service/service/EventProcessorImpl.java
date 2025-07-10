@@ -23,8 +23,9 @@ public class EventProcessorImpl implements EventProcessor {
     }
 
     @Override
-    public void processCancelledOrder(Long orderId) {
-
+    public void processCancelledOrder(Order order) {
+        log.info("Removing order: {} from order book", order.orderId());
+        redisOrderBookService.removeFromOrderBook(getOrderBookEntryFromOrder(order), order.type(), order.instrumentId());
     }
 
     @Override
@@ -49,5 +50,8 @@ public class EventProcessorImpl implements EventProcessor {
             }
             default -> throw new IllegalArgumentException(String.format("Unknown order type: %s", orderType));
         }
+    }
+    private OrderBookEntry getOrderBookEntryFromOrder(Order order){
+        return new OrderBookEntry(order.orderId(), order.count(), order.lotPrice().doubleValue(), order.portfolioId());
     }
 }
