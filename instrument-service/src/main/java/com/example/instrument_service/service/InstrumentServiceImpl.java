@@ -18,6 +18,8 @@ import java.util.Optional;
 public class InstrumentServiceImpl implements InstrumentService {
     private final InstrumentRepository instrumentRepository;
 
+    private final KafkaNotificationService kafkaNotificationService;
+
     @Override
     public Instrument getInstrument(Long instrumentId) {
         return instrumentRepository.findById(instrumentId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -45,6 +47,8 @@ public class InstrumentServiceImpl implements InstrumentService {
         instrument.setTicker(request.ticker());
 
         instrumentRepository.save(instrument);
+        kafkaNotificationService.sendEvent(instrument, "create");
+
         return instrument;
     }
 
@@ -70,7 +74,11 @@ public class InstrumentServiceImpl implements InstrumentService {
         Optional.ofNullable(request.ticker()).ifPresent(instrument::setTicker);
         Optional.ofNullable(request.title()).ifPresent(instrument::setTitle);
 
-        return instrumentRepository.save(instrument);
+        instrumentRepository.save(instrument);
+
+        kafkaNotificationService.sendEvent(instrument, "update");
+
+        return instrument;
     }
 
 }

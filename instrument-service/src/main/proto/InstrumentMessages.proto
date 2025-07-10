@@ -2,3 +2,15 @@ syntax = "proto3";
 package com.aws.protobuf;
 option java_outer_classname = "InstrumentMessages";
 
+message InstrumentEvent {
+  oneof event {
+    InstrumentMessageEvent instrument_created = 1;
+    InstrumentMessageEvent instrument_updated = 2;
+  }
+}
+
+message InstrumentMessageEvent {
+  int64 instrument_id = 1;
+  string title = 2;
+  string ticker = 3;
+}

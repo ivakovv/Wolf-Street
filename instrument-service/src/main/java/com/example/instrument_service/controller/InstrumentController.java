@@ -47,7 +47,7 @@ public class InstrumentController {
     })
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping()
-    public ResponseEntity<Instrument> createInstrument(CreateInstrumentRequestDto request) {
+    public ResponseEntity<Instrument> createInstrument(@RequestBody CreateInstrumentRequestDto request) {
         return ResponseEntity.ok(instrumentService.createInstrument(request));
     }
 
@@ -58,7 +58,7 @@ public class InstrumentController {
     })
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping()
-    public ResponseEntity<Instrument> updateInstrument(UpdateInstrumentRequestDto request) {
+    public ResponseEntity<Instrument> updateInstrument(@RequestBody UpdateInstrumentRequestDto request) {
         return ResponseEntity.ok(instrumentService.updateInstrument(request));
     }
 
