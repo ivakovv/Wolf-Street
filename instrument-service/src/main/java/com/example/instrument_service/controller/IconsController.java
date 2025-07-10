@@ -28,7 +28,7 @@ public class IconsController {
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
     @PutMapping(value = "/instruments/{instrument_id}", consumes = MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadUserAvatar(@RequestParam MultipartFile icon, @PathVariable("instrument_id") Long instrumentId)
+    public ResponseEntity<String> uploadInstrumentPhoto(@RequestParam MultipartFile icon, @PathVariable("instrument_id") Long instrumentId)
             throws IOException {
         if (icon.getSize() > 20971520L) {
             return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
