@@ -26,12 +26,8 @@ public class DealEventListener {
             case DEAL_EXECUTED -> {
                 log.info("processing executed deal...");
                 DealMessages.DealExecutedEvent dealExecutedEvent = request.getDealExecuted();
+                log.info("payload: {}", dealExecutedEvent);
                 eventProcessor.processExecutedDeal(mapperFromEventToDeal.mapToDealFromEvent(dealExecutedEvent));
-            }
-            case DEAL_CANCELLED -> {
-                log.info("processing cancelled deal...");
-                DealMessages.DealCancelledEvent dealCancelledEvent = request.getDealCancelled();
-                eventProcessor.processCancelledDeal(dealCancelledEvent.getOrderId());
             }
             case EVENT_NOT_SET -> log.warn("Received a DealEvent with no event");
             default -> log.error("Received an unknown event type: {}", request.getEventCase());

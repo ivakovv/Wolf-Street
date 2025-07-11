@@ -30,7 +30,7 @@ public interface MapperFromEventToOrder {
     @Mapping(target = "userId", source = "userId")
     @Mapping(target = "portfolioId", source = "portfolioId")
     @Mapping(target = "instrumentId", source = "instrumentId")
-    @Mapping(target = "count", source = "count")
+    @Mapping(target = "count", expression = "java(orderUpdatedEvent.getCount() - orderUpdatedEvent.getExecutedCount())")
     @Mapping(target = "lotPrice", expression = "java(new BigDecimal(orderUpdatedEvent.getLotPrice()))")
     @Mapping(target = "type", source = "type", qualifiedByName = "mapOrderType")
     @Mapping(target = "status", source = "status", qualifiedByName = "mapOrderStatus")
