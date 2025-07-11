@@ -63,17 +63,17 @@ jobs:
 
             # Applying postgres manifest
             kubectl apply -f k8s/postgres/
-            kubectl rollout status deployment/postgres-deployment --timeout=300s
+            kubectl rollout status deployment/postgres-deployment --timeout=360s
 
             # Applying kafka manifest
             kubectl apply -f k8s/kafka/
-            kubectl rollout status deployment/zookeeper-deployment --timeout=300s
-            kubectl rollout status deployment/kafka-deployment --timeout=300s
-            kubectl rollout status deployment/schema-registry-deployment --timeout=300s
+            kubectl rollout status deployment/zookeeper-deployment --timeout=360s
+            kubectl rollout status deployment/kafka-deployment --timeout=360s
+            kubectl rollout status deployment/schema-registry-deployment --timeout=360s
 
             # Applying redis manifest
             kubectl apply -f k8s/redis/
-            kubectl rollout status deployment/redis-deployment --timeout=300s
+            kubectl rollout status deployment/redis-deployment --timeout=360s
 
             # Applying secrets
             kubectl apply -f k8s/common/
