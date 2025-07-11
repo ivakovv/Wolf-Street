@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: instrument-service
+spec:
+  selector:
+    app: instrument-service
+  ports:
+    - protocol: TCP
+      port: 8091
+      targetPort: 8091
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: instrument-service-configmap
+data:
+  SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-service:5432/instrument_service
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-service:9092
+  SPRING_KAFKA_PROPERTIES_SCHEMA_REGISTRY_URL: http://schema-registry-service:8081
+  SPRING_APPLICATION_NAME: instrument-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: instrument-service-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: instrument-service
+  template:
+    metadata:
+      labels:
+        app: instrument-service
+    spec:
+      containers:
+        - name: instrument-service
+          image: instrument-service:0.0.1-SNAPSHOT
+          ports:
+            - containerPort: 8091
+          envFrom:
+            - configMapRef:
+                name: instrument-service-configmap
+            - secretRef:
+                name: jwt-secret
+          env:
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: S3_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: s3-secrets
+                  key: S3_SECRET_KEY
+            - name: S3_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: s3-secrets
+                  key: S3_KEY_ID
+
