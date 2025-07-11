@@ -43,9 +43,9 @@ public class RedisOrderBookServiceImpl implements RedisOrderBookService {
         Long deleted = stringRedisTemplate.opsForZSet().remove(zsetKey, orderId.toString());
         orderBookRedisTemplate.opsForHash().delete(hashKey, orderId.toString());
         if (deleted != null && deleted > 0) {
-            log.info("Order from order book successfully deleted!");
+            log.info("Order: {} from order book successfully deleted!", orderId);
         } else {
-            log.error("Deleting order failed =(");
+            log.error("Deleting order {} failed =(", orderId);
         }
     }
 
@@ -60,7 +60,7 @@ public class RedisOrderBookServiceImpl implements RedisOrderBookService {
         String key = getRedisKeyForOrderLevels(instrumentId, type);
         Double newScore = stringRedisTemplate.opsForZSet().incrementScore(key, String.valueOf(price), -count);
         if (newScore != null && newScore <= 0) {
-            log.info("Removing order book level: {}, instrument: {}", price, instrumentId);
+            log.info("Removing order book level: {}, instrument: {}, side: {}", price, instrumentId, type);
             stringRedisTemplate.opsForZSet().remove(key, String.valueOf(price));
         }
     }
