@@ -3,6 +3,7 @@ syntax = "proto3";
 package com.aws.protobuf;
 option java_outer_classname = "DealMessages";
 
+import "google/protobuf/timestamp.proto";
 message DealEvent {
   oneof event {
     DealExecutedEvent deal_executed = 1;
@@ -23,6 +24,7 @@ message DealExecutedEvent {
   string lot_price = 6;
   string buy_order_price = 7;
   int64 instrument_id = 8;
+  google.protobuf.Timestamp created_at = 9;
 }
 
 message DealCancelledEvent {

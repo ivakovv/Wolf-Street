@@ -1,6 +1,7 @@
 package com.example.market_data_service.dto;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 
 public record Deal(Long buyOrderId,
                    Long saleOrderId,
@@ -9,5 +10,6 @@ public record Deal(Long buyOrderId,
                    Long instrumentId,
                    Long count,
                    BigDecimal lotPrice,
-                   BigDecimal buyOrderPrice) {
+                   BigDecimal buyOrderPrice,
+                   OffsetDateTime createdAt) {
 }

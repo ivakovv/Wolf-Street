@@ -42,5 +42,6 @@ public class EventProcessorImpl implements EventProcessor {
         redisOrderBookService.removeFromOrderBook(deal.saleOrderId(), OrderType.SALE, deal.instrumentId());
         redisOrderBookService.removeOrderLevel(deal.instrumentId(), OrderType.BUY, deal.buyOrderPrice().doubleValue(), deal.count());
         redisOrderBookService.removeOrderLevel(deal.instrumentId(), OrderType.SALE, deal.lotPrice().doubleValue(), deal.count());
+
     }
 }
