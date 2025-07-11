@@ -36,8 +36,13 @@ public class OrderBookServiceImpl implements OrderBookService {
 
     @Override
     public SpreadResponse getSpread(Long instrumentId) {
-        BigDecimal bestBid = BigDecimal.valueOf(redisOrderBookService.getBestBid(instrumentId).price());
-        BigDecimal bestAsk = BigDecimal.valueOf(redisOrderBookService.getBestAsk(instrumentId).price());
+        OrderBookEntry bestBidEntry = redisOrderBookService.getBestBid(instrumentId);
+        OrderBookEntry bestAskEntry = redisOrderBookService.getBestAsk(instrumentId);
+        if (bestBidEntry == null || bestAskEntry == null) {
+            return new SpreadResponse(instrumentId, null, null, null, null);
+        }
+        BigDecimal bestBid = BigDecimal.valueOf(bestBidEntry.price());
+        BigDecimal bestAsk = BigDecimal.valueOf(bestAskEntry.price());
         BigDecimal spread = bestAsk.subtract(bestBid);
         BigDecimal midPrice = bestBid.add(bestAsk).divide(BigDecimal.valueOf(2), 10, RoundingMode.FLOOR);
         return new SpreadResponse(instrumentId, bestBid, bestAsk, spread, midPrice);
