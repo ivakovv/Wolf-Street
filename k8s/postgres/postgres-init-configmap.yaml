@@ -8,3 +8,4 @@ data:
     CREATE DATABASE order_service;
     CREATE DATABASE portfolio_service;
     CREATE DATABASE instrument_service;
+    CREATE DATABASE matching_engine;
