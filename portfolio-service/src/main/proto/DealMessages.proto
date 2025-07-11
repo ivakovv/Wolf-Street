@@ -15,22 +15,21 @@ enum OrderType {
 }
 
 message DealExecutedEvent {
-  int64 deal_id = 1;
-  int64 buy_order_id = 2;
-  int64 sale_order_id = 3;
-  int64 buy_portfolio_id = 4;
-  int64 sale_portfolio_id = 5;
-  int64 count = 6;
-  string lot_price = 7;
-  string buy_order_price = 8;
-  int64 instrument_id = 9;
+  int64 buy_order_id = 1;
+  int64 sale_order_id = 2;
+  int64 buy_portfolio_id = 3;
+  int64 sale_portfolio_id = 4;
+  int64 count = 5;
+  string lot_price = 6;
+  string buy_order_price = 7;
+  int64 instrument_id = 8;
 }
 
 message DealCancelledEvent {
   int64 order_id = 1;
   int64 portfolio_id = 2;
-  int64 count = 4;
-  string lot_price = 5;
-  int64 instrument_id = 6;
-  OrderType order_type = 7;
+  int64 count = 3;
+  string lot_price = 4;
+  int64 instrument_id = 5;
+  OrderType order_type = 6;
 }
