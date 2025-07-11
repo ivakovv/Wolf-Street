@@ -115,11 +115,6 @@ public class OrderService {
             throw new IllegalArgumentException(String.format("Заявка с id %d закрыта", orderId));
         }
 
-        if (order.getLotPrice().compareTo(lotPrice) > 0) {
-            throw new IllegalArgumentException(String.format("Новая цена %s не может быть меньше текущей %s для заявки %d",
-                    lotPrice, order.getLotPrice(), orderId));
-        }
-
         Long newExecutedCount = order.getExecutedCount() + count;
         Long totalOrderCount = order.getCount();
 
