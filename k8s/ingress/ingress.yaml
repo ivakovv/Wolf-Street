@@ -35,3 +35,10 @@ spec:
                 name: portfolio-service
                 port:
                   number: 8083
+          - path: /instrument-service
+            pathType: Prefix
+            backend:
+              service:
+                name: instrument-service
+                port:
+                  8091

@@ -21,7 +21,7 @@ jobs:
 
       - name: Build and archive Docker images
         run: |
-          for service in user-service order-service portfolio-service matching-engine; do
+          for service in user-service order-service portfolio-service matching-engine instrument-service; do
             docker build -t $service:${{ github.sha }} -f $service/Dockerfile $service
             docker save $service:${{ github.sha }} | gzip > $service.tar.gz
           done
@@ -44,6 +44,10 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT || 22}}
           script: |
+            kubectl delete secret s3-secrets --ignore-not-found
+            kubectl create secret generic s3-secrets \
+              --from-literal=S3_KEY_ID="${{ secrets.S3_KEY_ID }}" \
+              --from-literal=S3_SECRET_KEY="${{ secrets.S3_SECRET_KEY }}"
             set -e
             cd ~/wolfstreet
 
@@ -52,6 +56,7 @@ jobs:
             minikube image load order-service.tar.gz
             minikube image load portfolio-service.tar.gz
             minikube image load matching-engine.tar.gz
+            minikube image load instrument-service.tar.gz
 
             # Delete archives
             rm *.tar.gz
@@ -81,12 +86,14 @@ jobs:
             kubectl set image deployment/order-service-deployment order-service=order-service:${{ github.sha }}
             kubectl set image deployment/portfolio-service-deployment portfolio-service=portfolio-service:${{ github.sha }}
             kubectl set image deployment/matching-engine-deployment matching-engine=matching-engine:${{ github.sha }}
+            kubectl set image deployment/instrument-service-deployment instrument-service=instrument-service:${{ github.sha }}
 
             # Service rollouts
             kubectl rollout status deployment/user-service-deployment --timeout=300s
             kubectl rollout status deployment/order-service-deployment --timeout=300s
             kubectl rollout status deployment/portfolio-service-deployment --timeout=300s
             kubectl rollout status deployment/matching-engine-deployment --timeout=300s
+            kubectl rollout status deployment/instrument-service-deployment --timeout=300s
 
             # Apply ingress
             echo "Applying ingress..."
