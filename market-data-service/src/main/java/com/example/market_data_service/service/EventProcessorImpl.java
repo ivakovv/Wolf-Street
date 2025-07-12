@@ -4,6 +4,7 @@ import com.example.market_data_service.dto.Deal;
 import com.example.market_data_service.dto.Order;
 import com.example.market_data_service.dto.enums.OrderType;
 import com.example.market_data_service.service.interfaces.EventProcessor;
+import com.example.market_data_service.service.interfaces.RedisOhlcService;
 import com.example.market_data_service.service.interfaces.RedisOrderBookService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class EventProcessorImpl implements EventProcessor {
     private final RedisOrderBookService redisOrderBookService;
+    private final RedisOhlcService redisOhlcService;
 
     @Override
     public void processCreatedOrder(Order order) {
@@ -42,6 +44,7 @@ public class EventProcessorImpl implements EventProcessor {
         redisOrderBookService.removeFromOrderBook(deal.saleOrderId(), OrderType.SALE, deal.instrumentId());
         redisOrderBookService.removeOrderLevel(deal.instrumentId(), OrderType.BUY, deal.buyOrderPrice().doubleValue(), deal.count());
         redisOrderBookService.removeOrderLevel(deal.instrumentId(), OrderType.SALE, deal.lotPrice().doubleValue(), deal.count());
-
+        log.info("Updating ohlc...");
+        redisOhlcService.processDeal(deal);
     }
 }

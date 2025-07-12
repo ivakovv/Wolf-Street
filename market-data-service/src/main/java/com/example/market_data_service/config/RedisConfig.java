@@ -1,5 +1,6 @@
 package com.example.market_data_service.config;
 
+import com.example.market_data_service.dto.ohlc.Ohlc;
 import com.example.market_data_service.dto.orderbook.OrderBookEntry;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -28,6 +29,18 @@ public class RedisConfig {
         template.setValueSerializer(new Jackson2JsonRedisSerializer<>(redisObjectMapper, OrderBookEntry.class));
         template.setHashKeySerializer(new StringRedisSerializer());
         template.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(redisObjectMapper, OrderBookEntry.class));
+        return template;
+    }
+    @Bean
+    public RedisTemplate<String, Ohlc> ohlcRedisTemplate(
+            RedisConnectionFactory factory,
+            ObjectMapper redisObjectMapper) {
+        RedisTemplate<String, Ohlc> template = new RedisTemplate<>();
+        template.setConnectionFactory(factory);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new Jackson2JsonRedisSerializer<>(redisObjectMapper, Ohlc.class));
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(redisObjectMapper, Ohlc.class));
         return template;
     }
 }
