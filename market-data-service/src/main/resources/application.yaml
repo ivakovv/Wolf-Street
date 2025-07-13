@@ -23,3 +23,7 @@ security:
     secret_key: dXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3M=
     access_token_expiration: 900000 #15 min
     refresh_token_expiration: 3600000 #1 hour
+logging:
+  level:
+    org.springframework.data.redis: DEBUG
+    io.lettuce.core: TRACE
