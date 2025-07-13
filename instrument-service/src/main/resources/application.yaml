@@ -1,3 +1,7 @@
+server:
+  port: 8091
+  servlet:
+    context-path: /instrument-service
 spring:
   application:
     name: instrument-service
