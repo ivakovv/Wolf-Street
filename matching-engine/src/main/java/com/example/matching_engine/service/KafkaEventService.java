@@ -3,6 +3,7 @@ package com.example.matching_engine.service;
 import com.aws.protobuf.DealMessages;
 import com.example.matching_engine.dto.Deal;
 import com.example.matching_engine.entity.Order;
+import com.google.protobuf.Timestamp;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +13,7 @@ import org.springframework.kafka.support.SendResult;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -34,6 +36,7 @@ public class KafkaEventService {
                 .setLotPrice(deal.lotPrice().toString())
                 .setBuyOrderPrice(deal.buyOrderPrice().toString())
                 .setInstrumentId(deal.instrumentId())
+                .setCreatedAt(buildTimestamp(OffsetDateTime.now()))
                 .build();
         DealMessages.DealEvent message = DealMessages.DealEvent.newBuilder()
                 .setDealExecuted(executedEvent)
@@ -69,5 +72,11 @@ public class KafkaEventService {
                 log.error("Failed to send message: {}", ex.getMessage());
             }
         });
+    }
+    private Timestamp buildTimestamp(OffsetDateTime dateTime) {
+        return Timestamp.newBuilder()
+                .setSeconds(dateTime.toEpochSecond())
+                .setNanos(dateTime.getNano())
+                .build();
     }
 }

@@ -4,12 +4,10 @@ package com.aws.protobuf;
 option java_outer_classname = "DealMessages";
 
 import "google/protobuf/timestamp.proto";
-
 message DealEvent {
   oneof event {
     DealExecutedEvent deal_executed = 1;
     DealCancelledEvent deal_cancelled = 2;
-    DealErrorEvent deal_error = 3;
   }
 }
 enum OrderType {
@@ -36,13 +34,4 @@ message DealCancelledEvent {
   string lot_price = 4;
   int64 instrument_id = 5;
   OrderType order_type = 6;
-}
-
-message DealErrorEvent {
-  int64 buy_order_id = 2;
-  int64 sale_order_id = 3;
-  int64 buy_portfolio_id = 4;
-  int64 sale_portfolio_id = 5;
-  int64 instrument_id = 6;
-  string description = 7;
 }

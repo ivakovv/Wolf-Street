@@ -70,7 +70,7 @@ public class MatchingEngineImpl implements MatchingEngine {
         }
         if (remains == 0) {
             order.setOrderStatus(OrderStatus.EXECUTED);
-        } else {
+        } else if (remains != order.getCount()) {
             order.setCount(remains);
             order.setOrderStatus(OrderStatus.PARTIALLY_EXECUTED);
         }
