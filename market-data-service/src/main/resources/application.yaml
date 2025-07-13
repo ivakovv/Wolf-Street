@@ -1,5 +1,7 @@
 server:
   port: 8089
+  servlet:
+    context-path: /market-data-service
 spring:
   application:
     name: market-data-service
@@ -15,7 +17,7 @@ spring:
   redis:
     host: localhost
     port: 6379
-    timeout: 10000
+    timeout: 2000
 security:
   jwt:
     secret_key: dXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3M=

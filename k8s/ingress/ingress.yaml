@@ -40,3 +40,11 @@ spec:
                 name: instrument-service
                 port:
                   number: 8091
+          - path: /market-data-service
+            pathType: Prefix
+            backend:
+              service:
+                name: market-data-service
+                port:
+                  number: 8089
+

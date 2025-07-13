@@ -21,7 +21,7 @@ jobs:
 
       - name: Build and archive Docker images
         run: |
-          for service in user-service order-service portfolio-service matching-engine instrument-service; do
+          for service in user-service order-service portfolio-service matching-engine instrument-service market-data-service; do
             docker build -t $service:${{ github.sha }} -f $service/Dockerfile $service
             docker save $service:${{ github.sha }} | gzip > $service.tar.gz
           done
@@ -57,6 +57,7 @@ jobs:
             minikube image load portfolio-service.tar.gz
             minikube image load matching-engine.tar.gz
             minikube image load instrument-service.tar.gz
+            minikube image load market-data-service.tar.gz
 
             # Delete archives
             rm *.tar.gz
@@ -87,6 +88,7 @@ jobs:
             kubectl set image deployment/portfolio-service-deployment portfolio-service=portfolio-service:${{ github.sha }}
             kubectl set image deployment/matching-engine-deployment matching-engine=matching-engine:${{ github.sha }}
             kubectl set image deployment/instrument-service-deployment instrument-service=instrument-service:${{ github.sha }}
+            kubectl set image deployment/market-data-service-deployment market-data-service=market-data-service:${{ github.sha }}
 
             # Service rollouts
             kubectl rollout status deployment/user-service-deployment --timeout=300s
@@ -94,6 +96,7 @@ jobs:
             kubectl rollout status deployment/portfolio-service-deployment --timeout=300s
             kubectl rollout status deployment/matching-engine-deployment --timeout=300s
             kubectl rollout status deployment/instrument-service-deployment --timeout=300s
+            kubectl rollout status deployment/market-data-service-deployment --timeout=300s
 
             # Apply ingress
             echo "Applying ingress..."

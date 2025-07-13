@@ -37,6 +37,10 @@ public class OrderBookController{
         return ResponseEntity.ok(orderBookService.getAggregatedOrderBook(instrumentId, limitLevels));
     }
     @GetMapping("/{instrumentId}/spread")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Spread для инструмента получен!"),
+            @ApiResponse(responseCode = "404", description = "Стакан для данного инструмента не существует!"),
+    })
     public ResponseEntity<SpreadResponse> getSpread(@PathVariable Long instrumentId){
         return ResponseEntity.ok(orderBookService.getSpread(instrumentId));
     }
