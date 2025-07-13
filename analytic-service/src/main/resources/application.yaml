@@ -5,18 +5,13 @@ spring:
   application:
     name: analytic-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/analytic_service
-    username: postgres
-    password: 123456
-    driverClassName: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: none
-    open-in-view: true
-    show-sql: true
-  liquibase:
-    enabled: true
-    change-log: classpath:/db/changelog/db.changelog-master.yaml
+    url: jdbc:clickhouse://localhost:8123/default?compress=0
+    username: default
+    password: "123"
+    driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
+    hikari:
+      maximum-pool-size: 5
+      connection-timeout: 30000
   kafka:
     bootstrap-servers: localhost:9092
     schema-registry-url: http://localhost:8081
