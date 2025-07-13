@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS cancelled_deals (
+CREATE TABLE IF NOT EXISTS executed_deals (
     id UUID DEFAULT generateUUIDv4(),
     order_id Int64 NOT NULL,
     portfolio_id Int64 NOT NULL,
