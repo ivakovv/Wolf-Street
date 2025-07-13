@@ -15,9 +15,9 @@ spring:
         transaction.state.log.replication.factor: 1
         transaction.state.log.min.isr: 1
   redis:
-    host: localhost
-    port: 6379
-    timeout: 2000
+    host: ${SPRING_REDIS_HOST:localhost}
+    port: ${SPRING_REDIS_PORT:6379}
+    timeout: ${SPRING_REDIS_TIMEOUT:2000}
 security:
   jwt:
     secret_key: dXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3M=
