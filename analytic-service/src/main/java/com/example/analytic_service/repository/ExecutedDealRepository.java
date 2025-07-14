@@ -18,7 +18,7 @@ public class ExecutedDealRepository {
 
     public void save(ExecutedDeal deal) {
         jdbcTemplate.update("""
-            INSERT INTO cancelled_deals 
+            INSERT INTO executed_deals 
             (order_id, portfolio_id, count, lot_price, instrument_id, order_type, created_at)
             VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
@@ -35,7 +35,7 @@ public class ExecutedDealRepository {
     public List<ExecutedDeal> getDeals(Long portfolioId, Long offset, Long limit) {
             String sql = """
             SELECT order_id, portfolio_id, count, lot_price, instrument_id, order_type, created_at
-            FROM cancelled_deals
+            FROM executed_deals
             WHERE portfolio_id = ?
             OFFSET ? LIMIT ?
             """;
@@ -59,7 +59,7 @@ public class ExecutedDealRepository {
 
     public List<ExecutedDeal> findByPortfolioId(long portfolioId) {
         return jdbcTemplate.query("""
-            SELECT * FROM cancelled_deals
+            SELECT * FROM executed_deals
             WHERE portfolio_id = ?
             ORDER BY created_at DESC
             """,

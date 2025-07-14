@@ -39,5 +39,6 @@ message PortfolioInstrumentsRequest {
 }
 
 message PortfolioProfitabilityResponse{
-  map<int64, string> mapProfitability = 1;
+  int64 portfolio_id = 1;
+  map<int64, string> mapProfitability = 2;
 }
