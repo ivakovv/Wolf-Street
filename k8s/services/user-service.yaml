@@ -17,6 +17,7 @@ metadata:
 data:
   SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-service:5432/user_service
   SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-service:9092
+  SPRING_KAFKA_PROPERTIES_SCHEMA_REGISTRY_URL: http://schema-registry-service:8081
   SPRING_APPLICATION_NAME: user-service
 ---
 apiVersion: apps/v1
