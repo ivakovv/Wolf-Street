@@ -19,7 +19,7 @@ import io.confluent.kafka.serializers.protobuf.KafkaProtobufSerializerConfig;
 public class KafkaConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
-    @Value("${spring.kafka.schema-registry-url}")
+    @Value("${spring.kafka.properties.schema.registry.url}")
     private String schemaRegistryUrl;
     @Bean
     Map<String, Object> producerConfigs(){
