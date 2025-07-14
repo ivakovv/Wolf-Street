@@ -19,7 +19,7 @@ public interface PortfolioService {
     List<PortfolioCashResponseDto> getCashForUser(Authentication authentication);
     void addInstrumentToPortfolio(Authentication authentication, InstrumentRequest request);
     void removeInstrumentFromPortfolio(Authentication authentication, InstrumentRequest request);
-    PortfolioValueResponseDto getCurrentPortfolioValue(Authentication authentication);
+    List<PortfolioValueResponseDto> getCurrentPortfolioValue(Authentication authentication);
     List<PortfolioHistoryResponseDto> getPortfolioHistory(Authentication authentication, Long from, Long to);
     PortfolioCashResponseDto addCash(Authentication authentication, CashRequestDto request);
     PortfolioProfitabilityResponse getProfitability(PortfolioProfitabilityRequest request, Authentication authentication);

@@ -23,6 +23,7 @@ import com.example.portfolio_service.repository.PortfolioCashRepository;
 import com.example.portfolio_service.repository.PortfolioInstrumentsRepository;
 import com.example.portfolio_service.repository.PortfolioRepository;
 import com.example.portfolio_service.service.grpc.AnalyticServiceClient;
+import com.example.portfolio_service.service.grpc.MarketDataServiceClient;
 import com.example.portfolio_service.service.interfaces.PortfolioService;
 import com.wolfstreet.security_lib.details.JwtDetails;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +48,7 @@ public class PortfolioServiceImpl implements PortfolioService {
     private final PortfolioCashRepository portfolioCashRepository;
     private final PortfolioInstrumentsRepository portfolioInstrumentsRepository;
     private final AnalyticServiceClient analyticServiceClient;
+    private final MarketDataServiceClient marketDataServiceClient;
     private final MapperToCashPortfolio mapperToCashPortfolio;
     private final MapperToPortfolioInstrument mapperToPortfolioInstrument;
     private final MapperToPortfolioInstrumentResponse mapperToPortfolioInstrumentResponse;
@@ -114,10 +120,25 @@ public class PortfolioServiceImpl implements PortfolioService {
         return portfolioProfitabilityMapper.mapToProfitabilityResponseDto(portfolioProfitability);
     }
 
-    //TODO скорее всего обращение к MarketData, для получения текущей информации по стоимости активов
     @Override
-    public PortfolioValueResponseDto getCurrentPortfolioValue(Authentication authentication) {
-        return null;
+    public List<PortfolioValueResponseDto> getCurrentPortfolioValue(Authentication authentication) {
+        Map<Long, Long> instruments = getInstrumentsForUser(authentication).stream()
+                .collect(Collectors.toMap(
+                        PortfolioInstrumentResponseDto::instrumentId,
+                        PortfolioInstrumentResponseDto::availableAmount
+                ));
+        Map<Long, String> instrumentsPriceMap = marketDataServiceClient
+                .getPortfolioValue(new ArrayList<>(instruments.keySet())).getInstrumentsPriceMap();
+        return instruments.entrySet().stream()
+                .map(entry -> {
+                    BigDecimal instrumentPrice = new BigDecimal(instrumentsPriceMap.get(entry.getKey()));
+                    return new PortfolioValueResponseDto(
+                            entry.getKey(),
+                            instrumentPrice,
+                            instrumentPrice.multiply(BigDecimal.valueOf(entry.getValue()))
+                    );
+                })
+                .toList();
     }
 
     @Override

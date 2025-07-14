@@ -15,14 +15,17 @@ spring:
         transaction.state.log.replication.factor: 1
         transaction.state.log.min.isr: 1
   redis:
-    host: ${SPRING_REDIS_HOST}
-    port: ${SPRING_REDIS_PORT}
-    timeout: ${SPRING_REDIS_TIMEOUT}
+    host: ${SPRING_REDIS_HOST:localhost}
+    port: ${SPRING_REDIS_PORT:6379}
+    timeout: ${SPRING_REDIS_TIMEOUT:2000}
 security:
   jwt:
     secret_key: dXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3M=
     access_token_expiration: 900000 #15 min
     refresh_token_expiration: 3600000 #1 hour
+grpc:
+  server:
+    port: 6569
 logging:
   level:
     org.springframework.data.redis: DEBUG

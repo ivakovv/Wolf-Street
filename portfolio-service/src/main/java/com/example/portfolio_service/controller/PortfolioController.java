@@ -85,11 +85,11 @@ public class PortfolioController {
 
     @GetMapping("/value")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Текущий баланс успешно получен!"),
+            @ApiResponse(responseCode = "200", description = "Стоимость инструментов портфеля успешно получена!"),
             @ApiResponse(responseCode = "401", description = "Пользователь не авторизован!"),
             @ApiResponse(responseCode = "404", description = "Портфель пользователя не найден!"),
     })
-    public ResponseEntity<PortfolioValueResponseDto> getCurrentPortfolioValue(Authentication authentication) {
+    public ResponseEntity<List<PortfolioValueResponseDto>> getCurrentPortfolioValue(Authentication authentication) {
         return ResponseEntity.ok(portfolioService.getCurrentPortfolioValue(authentication));
     }
 
