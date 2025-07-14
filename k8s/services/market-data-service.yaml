@@ -19,6 +19,7 @@ data:
   SPRING_KAFKA_PROPERTIES_SCHEMA_REGISTRY_URL: http://schema-registry-service:8081
   SPRING_APPLICATION_NAME: market-data-service
   SPRING_REDIS_HOST: redis-service
+  GRPC_SERVER_PORT: '6565'
   SPRING_REDIS_PORT: "6379"
   SPRING_REDIS_TIMEOUT: "2000"
 ---

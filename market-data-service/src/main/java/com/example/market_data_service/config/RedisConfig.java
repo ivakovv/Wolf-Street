@@ -4,7 +4,6 @@ import com.example.market_data_service.dto.ohlc.Ohlc;
 import com.example.market_data_service.dto.orderbook.OrderBookEntry;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,11 +24,12 @@ public class RedisConfig {
     }
 
     @Bean
-    public ObjectMapper redisObjectMapper(){
+    public ObjectMapper redisObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         return mapper;
     }
+
     @Bean
     public RedisTemplate<String, OrderBookEntry> orderBookRedisTemplate(
             RedisConnectionFactory factory,
@@ -42,6 +42,7 @@ public class RedisConfig {
         template.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(redisObjectMapper, OrderBookEntry.class));
         return template;
     }
+
     @Bean
     public RedisTemplate<String, Ohlc> ohlcRedisTemplate(
             RedisConnectionFactory factory,

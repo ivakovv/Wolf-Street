@@ -6,11 +6,14 @@ option java_outer_classname = "AnalyticServiceProto";
 
 service AnalyticService {
   rpc getPortfolioHistory (PortfolioHistoryRequest) returns (PortfolioHistoryResponse);
+  rpc getPortfolioProfitability (PortfolioInstrumentsRequest) returns (PortfolioProfitabilityResponse);
 }
 
 
 message PortfolioHistoryRequest {
   int64 portfolio_id = 1;
+  int64 lower_limit = 2;
+  int64 higher_limit = 3;
 }
 
 message PortfolioHistoryResponse {
@@ -20,7 +23,7 @@ message PortfolioHistoryResponse {
 message Deal {
   enum DealType {
     BUY = 0;
-    SELL = 1;
+    SALE = 1;
   }
   int64 deal_id = 1;
   DealType deal_type = 2;
@@ -28,4 +31,13 @@ message Deal {
   int64 instrument_id = 4;
   int64 count = 5;
   string lot_price = 6;
+}
+
+message PortfolioInstrumentsRequest {
+  int64 portfolio_id = 1;
+  repeated int64 instruments_id = 2;
+}
+
+message PortfolioProfitabilityResponse{
+  map<int64, string> mapProfitability = 1;
 }
