@@ -6,6 +6,8 @@ import com.example.portfolio_service.dto.PortfolioCashResponseDto;
 import com.example.portfolio_service.dto.PortfolioHistoryResponseDto;
 import com.example.portfolio_service.dto.PortfolioInstrumentResponseDto;
 import com.example.portfolio_service.dto.PortfolioValueResponseDto;
+import com.example.portfolio_service.dto.profitability.PortfolioProfitabilityRequest;
+import com.example.portfolio_service.dto.profitability.PortfolioProfitabilityResponse;
 import com.example.portfolio_service.service.interfaces.PortfolioService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -43,9 +46,8 @@ public class PortfolioController {
             @ApiResponse(responseCode = "401", description = "Пользователь не авторизован!"),
             @ApiResponse(responseCode = "404", description = "Портфель пользователя не найден!"),
     })
-    public ResponseEntity<PortfolioCashResponseDto> addCash(Authentication authentication, @RequestBody CashRequestDto request){
-        portfolioService.addCash(authentication, request);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<PortfolioCashResponseDto> addCash(Authentication authentication, @RequestBody CashRequestDto request) {
+        return ResponseEntity.ok(portfolioService.addCash(authentication, request));
     }
 
     @GetMapping("/instruments")
@@ -87,7 +89,7 @@ public class PortfolioController {
             @ApiResponse(responseCode = "401", description = "Пользователь не авторизован!"),
             @ApiResponse(responseCode = "404", description = "Портфель пользователя не найден!"),
     })
-    public ResponseEntity<PortfolioValueResponseDto> getCurrentPortfolioValue(Authentication authentication){
+    public ResponseEntity<PortfolioValueResponseDto> getCurrentPortfolioValue(Authentication authentication) {
         return ResponseEntity.ok(portfolioService.getCurrentPortfolioValue(authentication));
     }
 
@@ -97,7 +99,24 @@ public class PortfolioController {
             @ApiResponse(responseCode = "401", description = "Пользователь не авторизован!"),
             @ApiResponse(responseCode = "404", description = "Портфель пользователя не найден!"),
     })
-    public ResponseEntity<List<PortfolioHistoryResponseDto>> getPortfolioHistory(Authentication authentication){
-        return ResponseEntity.ok(portfolioService.getPortfolioHistory(authentication));
+    public ResponseEntity<List<PortfolioHistoryResponseDto>> getPortfolioHistory(
+            Authentication authentication,
+            @RequestParam Long from,
+            @RequestParam Long to) {
+        {
+            return ResponseEntity.ok(portfolioService.getPortfolioHistory(authentication, from, to));
+        }
+    }
+
+    @GetMapping("/profitability")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Доходность портфеля успешно получена!"),
+            @ApiResponse(responseCode = "401", description = "Пользователь не авторизован!"),
+            @ApiResponse(responseCode = "404", description = "Портфель пользователя не найден!"),
+    })
+    public ResponseEntity<PortfolioProfitabilityResponse> getProfitability(
+            @RequestBody PortfolioProfitabilityRequest request,
+            Authentication authentication){
+        return ResponseEntity.ok(portfolioService.getProfitability(request, authentication));
     }
 }

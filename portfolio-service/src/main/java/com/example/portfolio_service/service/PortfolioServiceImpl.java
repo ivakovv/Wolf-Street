@@ -8,6 +8,8 @@ import com.example.portfolio_service.dto.PortfolioCashResponseDto;
 import com.example.portfolio_service.dto.PortfolioHistoryResponseDto;
 import com.example.portfolio_service.dto.PortfolioInstrumentResponseDto;
 import com.example.portfolio_service.dto.PortfolioValueResponseDto;
+import com.example.portfolio_service.dto.profitability.PortfolioProfitabilityRequest;
+import com.example.portfolio_service.dto.profitability.PortfolioProfitabilityResponse;
 import com.example.portfolio_service.entity.Portfolio;
 import com.example.portfolio_service.entity.PortfolioCash;
 import com.example.portfolio_service.entity.PortfolioInstruments;
@@ -16,6 +18,7 @@ import com.example.portfolio_service.mapper.MapperToPortfolioCashResponse;
 import com.example.portfolio_service.mapper.MapperToPortfolioHistory;
 import com.example.portfolio_service.mapper.MapperToPortfolioInstrument;
 import com.example.portfolio_service.mapper.MapperToPortfolioInstrumentResponse;
+import com.example.portfolio_service.mapper.PortfolioProfitabilityMapper;
 import com.example.portfolio_service.repository.PortfolioCashRepository;
 import com.example.portfolio_service.repository.PortfolioInstrumentsRepository;
 import com.example.portfolio_service.repository.PortfolioRepository;
@@ -45,6 +48,7 @@ public class PortfolioServiceImpl implements PortfolioService {
     private final MapperToPortfolioInstrumentResponse mapperToPortfolioInstrumentResponse;
     private final MapperToPortfolioCashResponse mapperToPortfolioCashResponse;
     private final MapperToPortfolioHistory mapperToPortfolioHistory;
+    private final PortfolioProfitabilityMapper portfolioProfitabilityMapper;
 
     @Override
     @Transactional
@@ -97,10 +101,17 @@ public class PortfolioServiceImpl implements PortfolioService {
     public PortfolioCashResponseDto addCash(Authentication authentication, CashRequestDto request) {
         PortfolioCash cash = portfolioCashRepository.findByPortfolioAndCurrency(
                 getPortfolioFromAuth(authentication), request.currency()).orElseThrow(
-                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Portfolio cash doesn't exists"));
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Portfolio cash doesn't exists"));
         cash.setAvailableAmount(cash.getAvailableAmount().add(request.amount()));
         PortfolioCash savedCash = portfolioCashRepository.save(cash);
         return mapperToPortfolioCashResponse.mapToPortfolioCashResponseDto(savedCash);
+    }
+
+    @Override
+    public PortfolioProfitabilityResponse getProfitability(PortfolioProfitabilityRequest request, Authentication authentication) {
+        AnalyticServiceProto.PortfolioProfitabilityResponse portfolioProfitability =
+                analyticServiceClient.getPortfolioProfitability(getPortfolioFromAuth(authentication).getId(), request);
+        return portfolioProfitabilityMapper.mapToProfitabilityResponseDto(portfolioProfitability);
     }
 
     //TODO скорее всего обращение к MarketData, для получения текущей информации по стоимости активов
@@ -110,8 +121,9 @@ public class PortfolioServiceImpl implements PortfolioService {
     }
 
     @Override
-    public List<PortfolioHistoryResponseDto> getPortfolioHistory(Authentication authentication) {
-        AnalyticServiceProto.PortfolioHistoryResponse portfolioHistory = analyticServiceClient.getPortfolioHistory(getPortfolioFromAuth(authentication).getId());
+    public List<PortfolioHistoryResponseDto> getPortfolioHistory(Authentication authentication, Long from, Long to) {
+        AnalyticServiceProto.PortfolioHistoryResponse portfolioHistory =
+                analyticServiceClient.getPortfolioHistory(getPortfolioFromAuth(authentication).getId(), from, to);
         return portfolioHistory.getDealsList().stream()
                 .map(mapperToPortfolioHistory::mapToPortfolioHistoryDto)
                 .toList();
@@ -142,12 +154,10 @@ public class PortfolioServiceImpl implements PortfolioService {
         return instrument.getAvailableAmount().equals(0L) && instrument.getBlockedAmount().equals(0L);
     }
 
-
     //TODO сделать тут норм чтобы было
     private void createInstrumentsPortfolio(Portfolio portfolio) {
         for (long instrumentId = 1L; instrumentId <= 3L; instrumentId++) {
             portfolioInstrumentsRepository.save(mapperToPortfolioInstrument.mapToPortfolioInstrument(portfolio, instrumentId));
         }
     }
-
 }
