@@ -1,0 +1,16 @@
+syntax = "proto3";
+package com.aws.protobuf;
+
+option java_outer_classname = "MarketDataServiceProto";
+
+service MarketDataService {
+  rpc GetPortfolioValue(PortfolioValueRequest) returns (PortfolioValueResponse);
+}
+
+message PortfolioValueRequest{
+  repeated int64 instrument_ids = 1;
+}
+
+message PortfolioValueResponse{
+  map<int64, string> instrumentsPrice = 1;
+}
