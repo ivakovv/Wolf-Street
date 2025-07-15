@@ -97,35 +97,4 @@ public class AnalyticServiceGrpc extends com.aws.protobuf.AnalyticServiceGrpc.An
             responseObserver.onError(e);
         }
     }
-    @Override
-    public void getInstrumentProfitability(AnalyticServiceProto.InstrumentProfitabilityRequest request,
-                                           StreamObserver<AnalyticServiceProto.InstrumentProfitabilityResponse> responseObserver) {
-        try {
-            log.info("Received instrument profitability request for instruments: {}, period: {}",
-                    request.getInstrumentIdList(), request.getPeriod());
-
-            Map<Long, BigDecimal> profitabilityMap = executedDealRepository.getInstrumentProfitability(
-                    request.getInstrumentIdList(),
-                    request.getPeriod());
-
-            Map<Long, String> stringProfitabilityMap = profitabilityMap.entrySet().stream()
-                    .collect(Collectors.toMap(
-                            Map.Entry::getKey,
-                            e -> e.getValue().toString()
-                    ));
-
-            AnalyticServiceProto.InstrumentProfitabilityResponse response =
-                    AnalyticServiceProto.InstrumentProfitabilityResponse.newBuilder()
-                            .putAllMapProfitability(stringProfitabilityMap)
-                            .build();
-
-            responseObserver.onNext(response);
-            responseObserver.onCompleted();
-
-            log.info("Instrument profitability calculation completed for {} instruments", profitabilityMap.size());
-        } catch (Exception e) {
-            log.error("Error calculating instrument profitability", e);
-            responseObserver.onError(e);
-        }
-    }
 }

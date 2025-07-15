@@ -3,6 +3,7 @@ package com.example.analytic_service.repository;
 import com.example.analytic_service.entity.ExecutedDeal;
 import com.example.analytic_service.enums.OrderType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -10,10 +11,12 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.ZoneOffset;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class ExecutedDealRepository {
@@ -62,6 +65,9 @@ public class ExecutedDealRepository {
         );
     }
     public Map<Long, BigDecimal> calculateRealizedProfit(Long portfolioId, List<Long> instrumentIds) {
+        if (instrumentIds == null || instrumentIds.isEmpty()) {
+            throw new IllegalArgumentException("Instrument IDs list cannot be empty");
+        }
         String sql = """
             WITH ranked_buys AS (
                 SELECT 
@@ -117,73 +123,58 @@ public class ExecutedDealRepository {
         return profitMap;
     }
 
-    public Map<Long, BigDecimal> getInstrumentProfitability(List<Long> instrumentIds, String period) {
-        String dateCondition;
-        switch (period) {
-            case "1 day":
-                dateCondition = "created_at >= now() - INTERVAL 1 DAY";
-                break;
-            case "1 week":
-                dateCondition = "created_at >= now() - INTERVAL 1 WEEK";
-                break;
-            case "1 month":
-                dateCondition = "created_at >= now() - INTERVAL 1 MONTH";
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid period: " + period);
+    public Map<Long, BigDecimal> getLastBuyPrices(List<Long> instrumentIds, String dateCondition) {
+        if (instrumentIds == null || instrumentIds.isEmpty()) {
+            return Map.of();
         }
+        String instrumentIdsList = instrumentIds.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(", ", "(", ")"));
 
         String sql = """
-            WITH instrument_prices AS (
-                SELECT 
-                    instrument_id,
-                    order_type,
-                    lot_price,
-                    created_at,
-                    row_number() OVER (PARTITION BY instrument_id, order_type ORDER BY created_at DESC) as rn
+            SELECT instrument_id, lot_price
+            FROM (
+                SELECT instrument_id, lot_price,
+                       row_number() OVER (PARTITION BY instrument_id ORDER BY created_at DESC) as rn
                 FROM executed_deals
-                WHERE (? OR instrument_id IN (%s)) AND %s
-            ),
-            latest_buys AS (
-                SELECT instrument_id, lot_price as buy_price
-                FROM instrument_prices
-                WHERE order_type = 'BUY' AND rn = 1
-            ),
-            latest_sales AS (
-                SELECT instrument_id, lot_price as sale_price
-                FROM instrument_prices
-                WHERE order_type = 'SALE' AND rn = 1
-            )
-            SELECT 
-                COALESCE(b.instrument_id, s.instrument_id) as instrument_id,
-                CASE 
-                    WHEN b.buy_price IS NOT NULL AND s.sale_price IS NOT NULL 
-                    THEN ((s.sale_price - b.buy_price) / b.buy_price) * 100
-                    ELSE 0
-                END as profitability
-            FROM latest_buys b
-            FULL OUTER JOIN latest_sales s ON b.instrument_id = s.instrument_id
-            """;
+                WHERE order_type = 'BUY'
+                  AND instrument_id IN %s
+                  AND %s
+            ) t
+            WHERE rn = 1
+        """;
 
-        String instrumentIdsPlaceholder = instrumentIds.isEmpty() ? "" :
-                instrumentIds.stream()
-                        .map(String::valueOf)
-                        .collect(Collectors.joining(","));
-
-        Map<Long, BigDecimal> profitMap = jdbcTemplate.query(
-                String.format(sql, instrumentIdsPlaceholder, dateCondition),
-                new Object[]{instrumentIds.isEmpty()},
-                (rs, rowNum) -> Map.entry(
-                        rs.getLong("instrument_id"),
-                        rs.getBigDecimal("profitability").setScale(2, RoundingMode.HALF_UP)
-                )
+        return jdbcTemplate.query(
+                String.format(sql, instrumentIdsList, dateCondition),
+                (rs, rowNum) -> Map.entry(rs.getLong("instrument_id"), rs.getBigDecimal("lot_price"))
         ).stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
 
-        if (!instrumentIds.isEmpty()) {
-            instrumentIds.forEach(id -> profitMap.putIfAbsent(id, BigDecimal.ZERO.setScale(2)));
+    public Map<Long, BigDecimal> getLastSalePrices(List<Long> instrumentIds, String dateCondition) {
+        if (instrumentIds == null || instrumentIds.isEmpty()) {
+            return Map.of();
         }
+        String instrumentIdsList = instrumentIds.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(", ", "(", ")"));
 
-        return profitMap;
+        String sql = """
+            SELECT instrument_id, lot_price
+            FROM (
+                SELECT instrument_id, lot_price,
+                       row_number() OVER (PARTITION BY instrument_id ORDER BY created_at DESC) as rn
+                FROM executed_deals
+                WHERE order_type = 'SALE'
+                  AND instrument_id IN %s
+                  AND %s
+            ) t
+            WHERE rn = 1
+        """;
+
+        return jdbcTemplate.query(
+                String.format(sql, instrumentIdsList, dateCondition),
+                (rs, rowNum) -> Map.entry(rs.getLong("instrument_id"), rs.getBigDecimal("lot_price"))
+        ).stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public List<ExecutedDeal> findByPortfolioId(long portfolioId) {
