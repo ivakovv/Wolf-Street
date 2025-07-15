@@ -7,6 +7,7 @@ option java_outer_classname = "AnalyticServiceProto";
 service AnalyticService {
   rpc getPortfolioHistory (PortfolioHistoryRequest) returns (PortfolioHistoryResponse);
   rpc getPortfolioProfitability (PortfolioInstrumentsRequest) returns (PortfolioProfitabilityResponse);
+  rpc getInstrumentProfitability (InstrumentProfitabilityRequest) returns (InstrumentProfitabilityResponse);
 }
 
 
@@ -41,4 +42,13 @@ message PortfolioInstrumentsRequest {
 message PortfolioProfitabilityResponse{
   int64 portfolio_id = 1;
   map<int64, string> mapProfitability = 2;
+}
+
+message InstrumentProfitabilityRequest {
+  repeated int64 instrument_id = 1;
+  string period = 2;
+}
+
+message InstrumentProfitabilityResponse {
+  map<int64, string> mapProfitability = 1;
 }

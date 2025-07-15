@@ -9,8 +9,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.service.GrpcService;
 import com.google.protobuf.Timestamp;
+
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -20,10 +23,17 @@ public class AnalyticServiceGrpc extends com.aws.protobuf.AnalyticServiceGrpc.An
 
     private final ExecutedDealRepository executedDealRepository;
 
+    @Override
     public void getPortfolioHistory(AnalyticServiceProto.PortfolioHistoryRequest request,
                                     StreamObserver<AnalyticServiceProto.PortfolioHistoryResponse> responseObserver) {
 
         List<ExecutedDeal> deals = executedDealRepository.getDeals(
+                request.getPortfolioId(),
+                request.getLowerLimit(),
+                request.getHigherLimit());
+
+        log.info("Retrieved {} deals for portfolioId: {}, offset: {}, limit: {}",
+                deals.size(),
                 request.getPortfolioId(),
                 request.getLowerLimit(),
                 request.getHigherLimit());
@@ -35,9 +45,11 @@ public class AnalyticServiceGrpc extends com.aws.protobuf.AnalyticServiceGrpc.An
         AnalyticServiceProto.PortfolioHistoryResponse response = AnalyticServiceProto.PortfolioHistoryResponse.newBuilder()
                 .addAllDeals(protoDeals)
                 .build();
-
         responseObserver.onNext(response);
         responseObserver.onCompleted();
+
+        log.info("Portfolio history request completed successfully for portfolioId: {}",
+                request.getPortfolioId());
     }
 
     private AnalyticServiceProto.Deal convertToProtoDeal(ExecutedDeal deal) {
@@ -58,5 +70,62 @@ public class AnalyticServiceGrpc extends com.aws.protobuf.AnalyticServiceGrpc.An
                 .setLotPrice(deal.getLotPrice().toString())
                 .build();
     }
+    @Override
+    public void getPortfolioProfitability(AnalyticServiceProto.PortfolioInstrumentsRequest request,
+                                          StreamObserver<AnalyticServiceProto.PortfolioProfitabilityResponse> responseObserver) {
+        try {
+            log.info("Received portfolio profitability request for portfolioId: {}, instruments: {}",
+                    request.getPortfolioId(), request.getInstrumentsIdList());
 
+            Map<Long, BigDecimal> profitabilityMap = executedDealRepository.calculateRealizedProfit(
+                    request.getPortfolioId(),
+                    request.getInstrumentsIdList());
+
+            AnalyticServiceProto.PortfolioProfitabilityResponse.Builder responseBuilder =
+                    AnalyticServiceProto.PortfolioProfitabilityResponse.newBuilder()
+                            .setPortfolioId(request.getPortfolioId());
+
+            profitabilityMap.forEach((instrumentId, profit) ->
+                    responseBuilder.putMapProfitability(instrumentId, profit.toString()));
+
+            responseObserver.onNext(responseBuilder.build());
+            responseObserver.onCompleted();
+
+            log.info("Portfolio profitability calculation completed for portfolioId: {}", request.getPortfolioId());
+        } catch (Exception e) {
+            log.error("Error calculating portfolio profitability", e);
+            responseObserver.onError(e);
+        }
+    }
+    @Override
+    public void getInstrumentProfitability(AnalyticServiceProto.InstrumentProfitabilityRequest request,
+                                           StreamObserver<AnalyticServiceProto.InstrumentProfitabilityResponse> responseObserver) {
+        try {
+            log.info("Received instrument profitability request for instruments: {}, period: {}",
+                    request.getInstrumentIdList(), request.getPeriod());
+
+            Map<Long, BigDecimal> profitabilityMap = executedDealRepository.getInstrumentProfitability(
+                    request.getInstrumentIdList(),
+                    request.getPeriod());
+
+            Map<Long, String> stringProfitabilityMap = profitabilityMap.entrySet().stream()
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            e -> e.getValue().toString()
+                    ));
+
+            AnalyticServiceProto.InstrumentProfitabilityResponse response =
+                    AnalyticServiceProto.InstrumentProfitabilityResponse.newBuilder()
+                            .putAllMapProfitability(stringProfitabilityMap)
+                            .build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+
+            log.info("Instrument profitability calculation completed for {} instruments", profitabilityMap.size());
+        } catch (Exception e) {
+            log.error("Error calculating instrument profitability", e);
+            responseObserver.onError(e);
+        }
+    }
 }
