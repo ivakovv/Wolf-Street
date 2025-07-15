@@ -36,13 +36,13 @@ public class AnalyticService {
 
         String dateCondition;
         switch (period) {
-            case "1 day":
+            case "1d":
                 dateCondition = "created_at >= subtractDays(now(), 1)";
                 break;
-            case "1 week":
+            case "1w":
                 dateCondition = "created_at >= subtractWeeks(now(), 1)";
                 break;
-            case "1 month":
+            case "1m":
                 dateCondition = "created_at >= subtractMonths(now(), 1)";
                 break;
             default:

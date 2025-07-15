@@ -9,9 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.ZoneOffset;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -125,7 +123,7 @@ public class ExecutedDealRepository {
 
     public Map<Long, BigDecimal> getLastBuyPrices(List<Long> instrumentIds, String dateCondition) {
         if (instrumentIds == null || instrumentIds.isEmpty()) {
-            return Map.of();
+            throw new IllegalArgumentException("Instrument IDs list cannot be empty");
         }
         String instrumentIdsList = instrumentIds.stream()
                 .map(String::valueOf)
@@ -152,7 +150,7 @@ public class ExecutedDealRepository {
 
     public Map<Long, BigDecimal> getLastSalePrices(List<Long> instrumentIds, String dateCondition) {
         if (instrumentIds == null || instrumentIds.isEmpty()) {
-            return Map.of();
+            throw new IllegalArgumentException("Instrument IDs list cannot be empty");
         }
         String instrumentIdsList = instrumentIds.stream()
                 .map(String::valueOf)
