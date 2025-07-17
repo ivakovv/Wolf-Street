@@ -4,6 +4,7 @@ import com.example.market_data_service.dto.orderbook.OrderBookAggregatedResponse
 import com.example.market_data_service.dto.orderbook.OrderBookResponse;
 import com.example.market_data_service.dto.orderbook.SpreadResponse;
 import com.example.market_data_service.service.interfaces.OrderBookService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,9 @@ public class OrderBookController{
     private final OrderBookService orderBookService;
 
     @GetMapping("/{instrumentId}")
+    @Operation(description = """
+            WebSocket по адресу: /topic/orderbook/{instrumentId}
+            """)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Стакан успешно получен!"),
             @ApiResponse(responseCode = "404", description = "Стакан для данного инструмента не существует!"),
@@ -29,6 +33,9 @@ public class OrderBookController{
         return ResponseEntity.ok(orderBookService.getOrderBook(instrumentId, limitOrders));
     }
     @GetMapping("/{instrumentId}/aggregated")
+    @Operation(description = """
+            WebSocket по адресу: /topic/aggregated/{instrumentId}
+            """)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Агрегированный стакан получен!"),
             @ApiResponse(responseCode = "404", description = "Стакан для данного инструмента не существует!"),
@@ -37,6 +44,9 @@ public class OrderBookController{
         return ResponseEntity.ok(orderBookService.getAggregatedOrderBook(instrumentId, limitLevels));
     }
     @GetMapping("/{instrumentId}/spread")
+    @Operation(description = """
+            WebSocket по адресу: /topic/spread/{instrumentId}
+            """)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Spread для инструмента получен!"),
             @ApiResponse(responseCode = "404", description = "Стакан для данного инструмента не существует!"),

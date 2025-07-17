@@ -1,6 +1,6 @@
 package com.example.market_data_service.service;
 
-import com.example.market_data_service.controller.MarketDataWebSocketController;
+import com.example.market_data_service.controller.MarketDataWebSocketPublisher;
 import com.example.market_data_service.dto.Deal;
 import com.example.market_data_service.dto.enums.Interval;
 import com.example.market_data_service.dto.ohlc.Ohlc;
@@ -25,7 +25,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class RedisOhlcServiceImpl implements RedisOhlcService {
     private final RedisTemplate<String, Ohlc> ohlcRedisTemplate;
-    private final MarketDataWebSocketController marketDataWebSocketController;
+    private final MarketDataWebSocketPublisher marketDataWebSocketController;
 
     @Override
     public void processDeal(Deal deal) {
