@@ -1,5 +1,6 @@
 package com.example.market_data_service.service;
 
+import com.example.market_data_service.controller.MarketDataWebSocketPublisher;
 import com.example.market_data_service.dto.Deal;
 import com.example.market_data_service.dto.enums.Interval;
 import com.example.market_data_service.dto.ohlc.Ohlc;
@@ -24,7 +25,8 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class RedisOhlcServiceImpl implements RedisOhlcService {
     private final RedisTemplate<String, Ohlc> ohlcRedisTemplate;
-
+    private final MarketDataWebSocketPublisher marketDataWebSocketController;
+  
     @Override
     public void processDeal(Deal deal) {
         for (Interval interval : Interval.values()) {
@@ -46,6 +48,7 @@ public class RedisOhlcServiceImpl implements RedisOhlcService {
             Ohlc updated = updateOhlc(ohlc, deal);
             zSetOps.remove(redisKey, ohlc);
             zSetOps.add(redisKey, updated, epochSeconds);
+            marketDataWebSocketController.sendOhlcUpdate(deal.instrumentId(), interval.toString(), updated);
         }
     }
 

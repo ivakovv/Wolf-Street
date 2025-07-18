@@ -54,4 +54,3 @@ spec:
                 name: analytic-service
                 port:
                   number: 8080
-
