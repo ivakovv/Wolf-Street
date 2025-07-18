@@ -1,0 +1,29 @@
+server:
+  servlet:
+    context-path: /analytic-service
+spring:
+  application:
+    name: analytic-service
+  datasource:
+    url: jdbc:clickhouse://localhost:8123/analytic_wolfstreet
+    username: default
+    password: ${CLICKHOUSE_PASSWORD}
+    driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
+    hikari:
+      maximum-pool-size: 5
+      connection-timeout: 30000
+  kafka:
+    bootstrap-servers: localhost:9092
+    schema-registry-url: http://localhost:8081
+    admin:
+      fail-fast: false
+      properties:
+        offsets.topic.replication.factor: 1
+        transaction.state.log.replication.factor: 1
+        transaction.state.log.min.isr: 1
+grpc:
+  server:
+    port: 6567
+security:
+  jwt:
+    secret_key: ${SECURITY_JWT_SECRET_KEY}

@@ -26,7 +26,7 @@ import java.util.Set;
 public class RedisOhlcServiceImpl implements RedisOhlcService {
     private final RedisTemplate<String, Ohlc> ohlcRedisTemplate;
     private final MarketDataWebSocketPublisher marketDataWebSocketController;
-
+  
     @Override
     public void processDeal(Deal deal) {
         for (Interval interval : Interval.values()) {
