@@ -65,6 +65,10 @@ jobs:
             # Applying postgres manifest
             kubectl apply -f k8s/postgres/
             kubectl rollout status deployment/postgres-deployment --timeout=360s
+            
+            # Applying clickhouse manifest
+            kubectl apply -f k8s/clickhouse
+            kubectl rollout status deployment/clickhouse-deployment --timeout=360s
 
             # Applying kafka manifest
             kubectl apply -f k8s/kafka/
