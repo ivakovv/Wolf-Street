@@ -7,8 +7,8 @@ spring:
     name: user-service
   datasource:
     url: jdbc:postgresql://localhost:5432/user_service
-    username: postgres
-    password: 123456
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driverClassName: org.postgresql.Driver
   jpa:
     hibernate:
@@ -38,6 +38,6 @@ s3:
   bucket: wolfstreet
 security:
   jwt:
-    secret_key: dXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3M=
+    secret_key: ${SECURITY_JWT_SECRET_KEY}
     access_token_expiration: 900000 #15 min
     refresh_token_expiration: 3600000 #1 hour

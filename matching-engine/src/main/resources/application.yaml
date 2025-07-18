@@ -5,8 +5,8 @@ spring:
     name: matching-engine
   datasource:
     url: jdbc:postgresql://localhost:5432/matching_engine
-    username: postgres
-    password: 123456
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driverClassName: org.postgresql.Driver
   jpa:
     hibernate:

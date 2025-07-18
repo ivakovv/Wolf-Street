@@ -7,8 +7,8 @@ spring:
     name: order-service
   datasource:
     url: jdbc:postgresql://localhost:5432/order_service
-    username: postgres
-    password: 123456
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driverClassName: org.postgresql.Driver
   jpa:
     hibernate:
@@ -39,4 +39,4 @@ grpc:
 
 security:
   jwt:
-    secret_key: dXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3M=
+    secret_key: ${SECURITY_JWT_SECRET_KEY}
