@@ -21,15 +21,9 @@ spring:
         offsets.topic.replication.factor: 1
         transaction.state.log.replication.factor: 1
         transaction.state.log.min.isr: 1
-
-
 grpc:
-  client:
-    portfolio-service:
-      address: static://localhost:6565
-      enable-keep-alive: true
-      negotiation-type: plaintext
-
+  server:
+    port: 6567
 security:
   jwt:
-    secret_key: dXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3NfdXNhY2hldl9odWVzb3M=
+    secret_key: ${SECURITY_JWT_SECRET_KEY}

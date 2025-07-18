@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: analytic-service
+spec:
+  selector:
+    app: analytic-service
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: analytic-service-configmap
+data:
+  SPRING_DATASOURCE_URL: jdbc:clickhouse://localhost:8123/analytic_wolfstreet
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-service:9092
+  SPRING_KAFKA_PROPERTIES_SCHEMA_REGISTRY_URL: http://schema-registry-service:8081
+  SPRING_APPLICATION_NAME: analytic-service
+  GRPC_SERVER_PORT: '6567'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytic-service-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: analytic-service
+  template:
+    metadata:
+      labels:
+        app: analytic-service
+    spec:
+      containers:
+        - name: analytic-service
+          image: analytic-service:0.0.1-SNAPSHOT
+          ports:
+            - containerPort: 8087
+            - containerPort: 6567
+          envFrom:
+            - configMapRef:
+                name: analytic-service-configmap
+            - secretRef:
+                name: jwt-secret
+          env:
+            - name: CLICKHOUSE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: clickhouse-secret
+                  key: CLICKHOUSE_PASSWORD
+
+

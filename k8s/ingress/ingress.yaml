@@ -47,4 +47,11 @@ spec:
                 name: market-data-service
                 port:
                   number: 8089
+          - path: /analytic-service
+            pathType: Prefix
+            backend:
+              service:
+                name: analytic-service
+                port:
+                  number: 8080
 
