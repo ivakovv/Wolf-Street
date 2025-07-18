@@ -60,8 +60,8 @@ spec:
             - name: CLICKHOUSE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: clickhouse-secrets
-                  key: password
+                  name: clickhouse-secret
+                  key: CLICKHOUSE_PASSWORD
             - name: CLICKHOUSE_DB
               value: "analytic_wolfstreet"
       volumes:

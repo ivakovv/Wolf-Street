@@ -48,6 +48,16 @@ jobs:
             kubectl create secret generic s3-secrets \
               --from-literal=S3_KEY_ID="${{ secrets.S3_KEY_ID }}" \
               --from-literal=S3_SECRET_KEY="${{ secrets.S3_SECRET_KEY }}"
+            kubectl delete secret jwt-secret --ignore-not-found
+            kubectl create secret generic jwt-secret \
+              --from-literal=SECURITY_JWT_SECRET_KEY="${{ secrets.SECURITY_JWT_SECRET_KEY }}"
+            kubectl delete secret postgres-secret --ignore-not-found
+            kubectl create secret generic postgres-secret \
+              --from-literal=POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}" \
+              --from-literal=POSTGRES_USER="${{ secrets.POSTGRES_USER }}" 
+            kubectl delete secret clickhouse-secret --ignore-not-found
+            kubectl create secret generic clickhouse-secret \
+              --from-literal=CLICKHOUSE_PASSWORD="${{ secrets.CLICKHOUSE_PASSWORD }}" \
             set -e
             cd ~/wolfstreet
 
