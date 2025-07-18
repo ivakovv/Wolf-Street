@@ -10,7 +10,8 @@ metadata:
     nginx.ingress.kubernetes.io/enable-cors: "true"
 spec:
   rules:
-    - http:
+    - host: wolf-street.ru
+      http:
         paths:
           - path: /user-service
             pathType: Prefix
