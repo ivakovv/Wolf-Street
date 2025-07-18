@@ -15,7 +15,7 @@ kind: ConfigMap
 metadata:
   name: analytic-service-configmap
 data:
-  SPRING_DATASOURCE_URL: jdbc:clickhouse://localhost:8123/analytic_wolfstreet
+  SPRING_DATASOURCE_URL: jdbc:clickhouse://clickhouse-service:8123/analytic_wolfstreet
   SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-service:9092
   SPRING_KAFKA_PROPERTIES_SCHEMA_REGISTRY_URL: http://schema-registry-service:8081
   SPRING_APPLICATION_NAME: analytic-service
