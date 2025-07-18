@@ -1,6 +1,8 @@
 package com.example.analytic_service.controller;
 
 import com.example.analytic_service.service.AnalyticService;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +22,11 @@ public class AnalyticController {
 
     private final AnalyticService analyticService;
 
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Данные получены"),
+            @ApiResponse(responseCode = "400", description = "Данные не верный формат данных"),
+            @ApiResponse(responseCode = "503", description = "Сервис не отвечает")
+    })
     @GetMapping("/profitability")
     public ResponseEntity<Map<Long, String>> getInstrumentProfitability(
             @RequestParam List<Long> instrumentIds,
