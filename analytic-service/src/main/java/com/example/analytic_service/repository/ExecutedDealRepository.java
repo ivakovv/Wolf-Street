@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
@@ -121,7 +122,7 @@ public class ExecutedDealRepository {
         return profitMap;
     }
 
-    public Map<Long, BigDecimal> getLastBuyPrices(List<Long> instrumentIds, String dateCondition) {
+    public Map<Long, BigDecimal> getLastBuyPrices(List<Long> instrumentIds, OffsetDateTime fromDate) {
         if (instrumentIds == null || instrumentIds.isEmpty()) {
             throw new IllegalArgumentException("Instrument IDs list cannot be empty");
         }
@@ -137,18 +138,19 @@ public class ExecutedDealRepository {
                 FROM executed_deals
                 WHERE order_type = 'BUY'
                   AND instrument_id IN %s
-                  AND %s
+                  AND created_at >= ?
             ) t
             WHERE rn = 1
         """;
 
         return jdbcTemplate.query(
-                String.format(sql, instrumentIdsList, dateCondition),
+                String.format(sql, instrumentIdsList),
+                new Object[]{fromDate},
                 (rs, rowNum) -> Map.entry(rs.getLong("instrument_id"), rs.getBigDecimal("lot_price"))
         ).stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    public Map<Long, BigDecimal> getLastSalePrices(List<Long> instrumentIds, String dateCondition) {
+    public Map<Long, BigDecimal> getLastSalePrices(List<Long> instrumentIds, OffsetDateTime fromDate) {
         if (instrumentIds == null || instrumentIds.isEmpty()) {
             throw new IllegalArgumentException("Instrument IDs list cannot be empty");
         }
@@ -164,13 +166,14 @@ public class ExecutedDealRepository {
                 FROM executed_deals
                 WHERE order_type = 'SALE'
                   AND instrument_id IN %s
-                  AND %s
+                  AND created_at >= ?
             ) t
             WHERE rn = 1
         """;
 
         return jdbcTemplate.query(
-                String.format(sql, instrumentIdsList, dateCondition),
+                String.format(sql, instrumentIdsList),
+                new Object[]{fromDate},
                 (rs, rowNum) -> Map.entry(rs.getLong("instrument_id"), rs.getBigDecimal("lot_price"))
         ).stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }

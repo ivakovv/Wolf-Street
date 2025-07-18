@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,23 +35,23 @@ public class AnalyticService {
             throw new IllegalArgumentException("Instrument IDs list cannot be empty");
         }
 
-        String dateCondition;
+        OffsetDateTime fromDate;
         switch (period) {
             case "1d":
-                dateCondition = "created_at >= subtractDays(now(), 1)";
+                fromDate = OffsetDateTime.now().minusDays(1);
                 break;
             case "1w":
-                dateCondition = "created_at >= subtractWeeks(now(), 1)";
+                fromDate = OffsetDateTime.now().minusWeeks(1);
                 break;
             case "1m":
-                dateCondition = "created_at >= subtractMonths(now(), 1)";
+                fromDate = OffsetDateTime.now().minusMonths(1);
                 break;
             default:
                 throw new IllegalArgumentException("Invalid period: " + period);
         }
 
-        Map<Long, BigDecimal> buyMap = executedDealRepository.getLastBuyPrices(instrumentIds, dateCondition);
-        Map<Long, BigDecimal> saleMap = executedDealRepository.getLastSalePrices(instrumentIds, dateCondition);
+        Map<Long, BigDecimal> buyMap = executedDealRepository.getLastBuyPrices(instrumentIds, fromDate);
+        Map<Long, BigDecimal> saleMap = executedDealRepository.getLastSalePrices(instrumentIds, fromDate);
 
         Map<Long, BigDecimal> result = new HashMap<>();
         for (Long id : instrumentIds) {
