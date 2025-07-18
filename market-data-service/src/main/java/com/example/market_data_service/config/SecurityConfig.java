@@ -32,6 +32,8 @@ public class SecurityConfig {
                                 "/actuator/health",
                                 "/actuator/health/**",
                                 "/ws-market-data/**",
+                                "/ws-market-data/info/**",
+                                "/sockjs/info",
                                 "/topic/**",
                                 "/app/**").permitAll()
                         .anyRequest().authenticated())
