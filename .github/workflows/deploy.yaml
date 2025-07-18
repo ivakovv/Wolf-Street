@@ -57,7 +57,7 @@ jobs:
               --from-literal=POSTGRES_USER="${{ secrets.POSTGRES_USER }}" 
             kubectl delete secret clickhouse-secret --ignore-not-found
             kubectl create secret generic clickhouse-secret \
-              --from-literal=CLICKHOUSE_PASSWORD="${{ secrets.CLICKHOUSE_PASSWORD }}" \
+              --from-literal=CLICKHOUSE_PASSWORD="${{ secrets.CLICKHOUSE_PASSWORD }}"
             set -e
             cd ~/wolfstreet
 
