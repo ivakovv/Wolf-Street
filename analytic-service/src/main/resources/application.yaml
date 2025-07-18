@@ -7,7 +7,7 @@ spring:
   datasource:
     url: jdbc:clickhouse://localhost:8123/analytic_wolfstreet
     username: default
-    password: "123"
+    password: ${CLICKHOUSE_PASSWORD}
     driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
     hikari:
       maximum-pool-size: 5
