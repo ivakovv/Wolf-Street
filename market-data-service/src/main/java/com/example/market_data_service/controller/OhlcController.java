@@ -2,6 +2,7 @@ package com.example.market_data_service.controller;
 
 import com.example.market_data_service.dto.ohlc.Ohlc;
 import com.example.market_data_service.service.interfaces.RedisOhlcService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,11 @@ public class OhlcController {
     private final RedisOhlcService redisOhlcService;
 
     @GetMapping("/{instrumentId}")
+    @Operation(description = """
+            WebSocket по адресу:
+            OHLC: /topic/ohlc/{instrumentId}/{interval} (interval: {1m, 5m, 15m, 1h, 1d});
+            Deals: /topic/deals/{instrumentId}
+            """)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OHLC успешно получено!"),
             @ApiResponse(responseCode = "400", description = "Указан неверный временной интервал! (1m, 5m, 15m, 1h, 1d)"),
