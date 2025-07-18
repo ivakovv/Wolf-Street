@@ -6,6 +6,7 @@ import com.example.portfolio_service.dto.InstrumentRequest;
 import com.example.portfolio_service.dto.PortfolioCashResponseDto;
 import com.example.portfolio_service.dto.PortfolioHistoryResponseDto;
 import com.example.portfolio_service.dto.PortfolioInstrumentResponseDto;
+import com.example.portfolio_service.dto.PortfolioResponseDto;
 import com.example.portfolio_service.dto.PortfolioValueResponseDto;
 import com.example.portfolio_service.dto.profitability.PortfolioProfitabilityRequest;
 import com.example.portfolio_service.dto.profitability.PortfolioProfitabilityResponse;
@@ -14,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 
 public interface PortfolioService {
+    PortfolioResponseDto getPortfolioForUser(Authentication authentication);
     void createPortfoliosForNewUser(UserMessages.UserCreatedEvent userCreatedEvent);
     List<PortfolioInstrumentResponseDto> getInstrumentsForUser(Authentication authentication);
     List<PortfolioCashResponseDto> getCashForUser(Authentication authentication);

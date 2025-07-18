@@ -5,6 +5,7 @@ import com.example.portfolio_service.dto.InstrumentRequest;
 import com.example.portfolio_service.dto.PortfolioCashResponseDto;
 import com.example.portfolio_service.dto.PortfolioHistoryResponseDto;
 import com.example.portfolio_service.dto.PortfolioInstrumentResponseDto;
+import com.example.portfolio_service.dto.PortfolioResponseDto;
 import com.example.portfolio_service.dto.PortfolioValueResponseDto;
 import com.example.portfolio_service.dto.profitability.PortfolioProfitabilityRequest;
 import com.example.portfolio_service.dto.profitability.PortfolioProfitabilityResponse;
@@ -29,6 +30,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PortfolioController {
     private final PortfolioService portfolioService;
+
+    @GetMapping
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Портфель успешно получен!"),
+            @ApiResponse(responseCode = "401", description = "Пользователь не авторизован!"),
+            @ApiResponse(responseCode = "404", description = "Портфель пользователя не найден!"),
+    })
+    public ResponseEntity<PortfolioResponseDto> getPortfolio(Authentication authentication){
+        return ResponseEntity.ok(portfolioService.getPortfolioForUser(authentication));
+    }
 
     @GetMapping("/cash")
     @ApiResponses(value = {

@@ -7,6 +7,7 @@ import com.example.portfolio_service.dto.InstrumentRequest;
 import com.example.portfolio_service.dto.PortfolioCashResponseDto;
 import com.example.portfolio_service.dto.PortfolioHistoryResponseDto;
 import com.example.portfolio_service.dto.PortfolioInstrumentResponseDto;
+import com.example.portfolio_service.dto.PortfolioResponseDto;
 import com.example.portfolio_service.dto.PortfolioValueResponseDto;
 import com.example.portfolio_service.dto.profitability.PortfolioProfitabilityRequest;
 import com.example.portfolio_service.dto.profitability.PortfolioProfitabilityResponse;
@@ -55,6 +56,11 @@ public class PortfolioServiceImpl implements PortfolioService {
     private final MapperToPortfolioCashResponse mapperToPortfolioCashResponse;
     private final MapperToPortfolioHistory mapperToPortfolioHistory;
     private final PortfolioProfitabilityMapper portfolioProfitabilityMapper;
+
+    @Override
+    public PortfolioResponseDto getPortfolioForUser(Authentication authentication) {
+        return PortfolioResponseDto.fromPortfolio(getPortfolioFromAuth(authentication));
+    }
 
     @Override
     @Transactional
