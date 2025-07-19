@@ -183,7 +183,7 @@ public class PortfolioServiceImpl implements PortfolioService {
 
     //TODO сделать тут норм чтобы было
     private void createInstrumentsPortfolio(Portfolio portfolio) {
-        for (long instrumentId = 1L; instrumentId <= 3L; instrumentId++) {
+        for (long instrumentId = 1L; instrumentId <= 8L; instrumentId++) {
             portfolioInstrumentsRepository.save(mapperToPortfolioInstrument.mapToPortfolioInstrument(portfolio, instrumentId));
         }
     }
