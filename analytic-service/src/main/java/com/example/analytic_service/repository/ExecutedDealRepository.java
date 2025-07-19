@@ -9,7 +9,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
@@ -160,5 +159,33 @@ public class ExecutedDealRepository {
                 new BeanPropertyRowMapper<>(ExecutedDeal.class),
                 portfolioId
         );
+    }
+
+    /**
+     * Возвращает общий объем денег за период по всем инструментам
+     * @param fromDate дата начала периода (в формате yyyy-MM-dd HH:mm:ss.SSSSSS)
+     * @return BigDecimal totalVolume
+     */
+    public BigDecimal getTotalVolumeByPeriodAll(String fromDate) {
+        String sql = """
+            SELECT sum(lot_price * count) AS total_volume
+            FROM executed_deals
+            WHERE created_at >= ?
+        """;
+        return jdbcTemplate.queryForObject(sql, new Object[]{fromDate}, BigDecimal.class);
+    }
+
+    /**
+     * Возвращает общее количество совершённых сделок за период по всем инструментам
+     * @param fromDate дата начала периода (в формате yyyy-MM-dd HH:mm:ss.SSSSSS)
+     * @return int dealsCount
+     */
+    public int getTotalDealsCountByPeriodAll(String fromDate) {
+        String sql = """
+            SELECT count(*) AS deals_count
+            FROM executed_deals
+            WHERE created_at >= ?
+        """;
+        return jdbcTemplate.queryForObject(sql, new Object[]{fromDate}, Integer.class);
     }
 }
