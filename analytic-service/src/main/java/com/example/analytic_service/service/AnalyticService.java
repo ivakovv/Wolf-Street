@@ -53,4 +53,54 @@ public class AnalyticService {
 
         return executedDealRepository.getWeightedProfitability(instrumentIds, formattedFromDate);
     }
+
+    /**
+     * Возвращает общий объем денег за период по всем инструментам
+     * @param period период ('1d', '1w', '1m')
+     * @return BigDecimal totalVolume
+     */
+    public BigDecimal getTotalVolumeByPeriodAll(String period) {
+        OffsetDateTime fromDate;
+        switch (period) {
+            case "1d":
+                fromDate = OffsetDateTime.now().minusDays(1);
+                break;
+            case "1w":
+                fromDate = OffsetDateTime.now().minusWeeks(1);
+                break;
+            case "1m":
+                fromDate = OffsetDateTime.now().minusMonths(1);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid period: " + period);
+        }
+        String formattedFromDate = fromDate.truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"));
+        return executedDealRepository.getTotalVolumeByPeriodAll(formattedFromDate);
+    }
+
+    /**
+     * Возвращает общее количество совершённых сделок за период по всем инструментам
+     * @param period период ('1d', '1w', '1m')
+     * @return int dealsCount
+     */
+    public long getTotalDealsCountByPeriodAll(String period) {
+        OffsetDateTime fromDate;
+        switch (period) {
+            case "1d":
+                fromDate = OffsetDateTime.now().minusDays(1);
+                break;
+            case "1w":
+                fromDate = OffsetDateTime.now().minusWeeks(1);
+                break;
+            case "1m":
+                fromDate = OffsetDateTime.now().minusMonths(1);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid period: " + period);
+        }
+        String formattedFromDate = fromDate.truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"));
+        return executedDealRepository.getTotalDealsCountByPeriodAll(formattedFromDate);
+    }
 }

@@ -24,7 +24,7 @@ public class AnalyticController {
 
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Данные получены"),
-            @ApiResponse(responseCode = "400", description = "Данные не верный формат данных"),
+            @ApiResponse(responseCode = "400", description = "Не верный формат данных"),
             @ApiResponse(responseCode = "503", description = "Сервис не отвечает")
     })
     @GetMapping("/profitability")
@@ -36,5 +36,27 @@ public class AnalyticController {
         Map<Long, String> stringResult = result.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
         return ResponseEntity.ok(stringResult);
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Данные получены"),
+            @ApiResponse(responseCode = "400", description = "Не верный формат данных"),
+            @ApiResponse(responseCode = "503", description = "Сервис не отвечает")
+    })
+    @GetMapping("/total-volume")
+    public ResponseEntity<String> getTotalVolumeByPeriodAll(@RequestParam String period) {
+        BigDecimal totalVolume = analyticService.getTotalVolumeByPeriodAll(period);
+        return ResponseEntity.ok(totalVolume != null ? totalVolume.toPlainString() : "0");
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Данные получены"),
+            @ApiResponse(responseCode = "400", description = "Не верный формат данных"),
+            @ApiResponse(responseCode = "503", description = "Сервис не отвечает")
+    })
+    @GetMapping("/total-deals")
+    public ResponseEntity<Long> getTotalDealsCountByPeriodAll(@RequestParam String period) {
+        long dealsCount = analyticService.getTotalDealsCountByPeriodAll(period);
+        return ResponseEntity.ok(dealsCount);
     }
 }
