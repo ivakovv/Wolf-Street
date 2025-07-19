@@ -121,8 +121,8 @@ public class ExecutedDealRepository {
 
         return profitMap;
     }
-
-    public Map<Long, BigDecimal> getLastBuyPrices(List<Long> instrumentIds, OffsetDateTime fromDate) {
+    
+    public Map<Long, BigDecimal> getWeightedProfitability(List<Long> instrumentIds, String fromDate) {
         if (instrumentIds == null || instrumentIds.isEmpty()) {
             throw new IllegalArgumentException("Instrument IDs list cannot be empty");
         }
@@ -131,50 +131,23 @@ public class ExecutedDealRepository {
                 .collect(Collectors.joining(", ", "(", ")"));
 
         String sql = """
-            SELECT instrument_id, lot_price
-            FROM (
-                SELECT instrument_id, lot_price,
-                       row_number() OVER (PARTITION BY instrument_id ORDER BY created_at DESC) as rn
-                FROM executed_deals
-                WHERE order_type = 'BUY'
-                  AND instrument_id IN %s
-                  AND created_at >= ?
-            ) t
-            WHERE rn = 1
+            SELECT instrument_id,
+                   sumIf(lot_price * count, order_type = 'BUY') / nullIf(sumIf(count, order_type = 'BUY'), 0) AS weighted_avg_buy_price,
+                   sumIf(lot_price * count, order_type = 'SALE') / nullIf(sumIf(count, order_type = 'SALE'), 0) AS weighted_avg_sale_price,
+                   round((weighted_avg_sale_price - weighted_avg_buy_price) / weighted_avg_buy_price * 100, 2) AS profitability_percent
+            FROM executed_deals
+            WHERE instrument_id IN %s
+              AND created_at >= ?
+            GROUP BY instrument_id
         """;
 
         return jdbcTemplate.query(
                 String.format(sql, instrumentIdsList),
                 new Object[]{fromDate},
-                (rs, rowNum) -> Map.entry(rs.getLong("instrument_id"), rs.getBigDecimal("lot_price"))
-        ).stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    public Map<Long, BigDecimal> getLastSalePrices(List<Long> instrumentIds, OffsetDateTime fromDate) {
-        if (instrumentIds == null || instrumentIds.isEmpty()) {
-            throw new IllegalArgumentException("Instrument IDs list cannot be empty");
-        }
-        String instrumentIdsList = instrumentIds.stream()
-                .map(String::valueOf)
-                .collect(Collectors.joining(", ", "(", ")"));
-
-        String sql = """
-            SELECT instrument_id, lot_price
-            FROM (
-                SELECT instrument_id, lot_price,
-                       row_number() OVER (PARTITION BY instrument_id ORDER BY created_at DESC) as rn
-                FROM executed_deals
-                WHERE order_type = 'SALE'
-                  AND instrument_id IN %s
-                  AND created_at >= ?
-            ) t
-            WHERE rn = 1
-        """;
-
-        return jdbcTemplate.query(
-                String.format(sql, instrumentIdsList),
-                new Object[]{fromDate},
-                (rs, rowNum) -> Map.entry(rs.getLong("instrument_id"), rs.getBigDecimal("lot_price"))
+                (rs, rowNum) -> Map.entry(
+                        rs.getLong("instrument_id"),
+                        rs.getBigDecimal("profitability_percent")
+                )
         ).stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
