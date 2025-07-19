@@ -9,9 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.OffsetDateTime;
-import java.util.HashMap;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -49,24 +48,9 @@ public class AnalyticService {
             default:
                 throw new IllegalArgumentException("Invalid period: " + period);
         }
+        String formattedFromDate = fromDate.truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"));
 
-        Map<Long, BigDecimal> buyMap = executedDealRepository.getLastBuyPrices(instrumentIds, fromDate);
-        Map<Long, BigDecimal> saleMap = executedDealRepository.getLastSalePrices(instrumentIds, fromDate);
-
-        Map<Long, BigDecimal> result = new HashMap<>();
-        for (Long id : instrumentIds) {
-            BigDecimal buy = buyMap.get(id);
-            BigDecimal sale = saleMap.get(id);
-            if (buy != null && sale != null && buy.compareTo(BigDecimal.ZERO) != 0) {
-                BigDecimal profit = sale.subtract(buy)
-                        .divide(buy, 6, RoundingMode.HALF_UP)
-                        .multiply(BigDecimal.valueOf(100))
-                        .setScale(2, RoundingMode.HALF_UP);
-                result.put(id, profit);
-            } else {
-                result.put(id, BigDecimal.ZERO);
-            }
-        }
-        return result;
+        return executedDealRepository.getWeightedProfitability(instrumentIds, formattedFromDate);
     }
 }
