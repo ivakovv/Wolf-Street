@@ -9,12 +9,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -51,39 +51,52 @@ public class RedisOrderBookServiceImpl implements RedisOrderBookService {
 
     @Override
     public void addOrderLevel(Long instrumentId, OrderType type, double price, long count) {
-        String key = getRedisKeyForOrderLevels(instrumentId, type);
-        stringRedisTemplate.opsForZSet().incrementScore(key, String.valueOf(price), count);
+        String zsetKey = getRedisKeyForOrderLevels(instrumentId, type);
+        String hashKey = getRedisKeyForOrderLevelsHash(instrumentId, type);
+        String priceStr = new BigDecimal(price).toPlainString();
+        stringRedisTemplate.opsForHash().increment(hashKey, priceStr, count);
+        stringRedisTemplate.opsForZSet().add(zsetKey, priceStr, price);
     }
 
     @Override
     public void removeOrderLevel(Long instrumentId, OrderType type, double price, long count) {
-        String key = getRedisKeyForOrderLevels(instrumentId, type);
-        Double newScore = stringRedisTemplate.opsForZSet().incrementScore(key, String.valueOf(price), -count);
-        if (newScore != null && newScore <= 0) {
+        String zsetKey = getRedisKeyForOrderLevels(instrumentId, type);
+        String hashKey = getRedisKeyForOrderLevelsHash(instrumentId, type);
+        String priceStr = new BigDecimal(price).toPlainString();
+        Long newCount = stringRedisTemplate.opsForHash().increment(hashKey, priceStr, -count);
+        if (newCount <= 0) {
             log.info("Removing order book level: {}, instrument: {}, side: {}", price, instrumentId, type);
-            stringRedisTemplate.opsForZSet().remove(key, String.valueOf(price));
+            stringRedisTemplate.opsForHash().delete(hashKey, priceStr);
+            stringRedisTemplate.opsForZSet().remove(zsetKey, priceStr);
         }
     }
 
     @Override
     public List<AggregatedOrderBookLevel> getAggregatedLevels(Long instrumentId, OrderType type, long limit) {
-        String key = getRedisKeyForOrderLevels(instrumentId, type);
-        Set<ZSetOperations.TypedTuple<String>> levels;
-        if (type == OrderType.BUY) {
-            levels = stringRedisTemplate.opsForZSet().reverseRangeWithScores(key, 0, limit - 1);
-        } else {
-            levels = stringRedisTemplate.opsForZSet().rangeWithScores(key, 0, limit - 1);
+        String zsetKey = getRedisKeyForOrderLevels(instrumentId, type);
+        String hashKey = getRedisKeyForOrderLevelsHash(instrumentId, type);
+        Set<String> prices;
+        switch (type) {
+            case BUY -> prices = stringRedisTemplate.opsForZSet().reverseRange(zsetKey, 0, limit - 1);
+            case SALE -> prices = stringRedisTemplate.opsForZSet().range(zsetKey, 0, limit - 1);
+            default -> throw new IllegalArgumentException(String.format("Unknown order type: %s", type));
         }
-        if (levels == null) {
+        if (prices == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Order book for instrument with id: %d doesn't exists", instrumentId));
         }
-        return levels.stream()
-                .filter(tuple -> tuple.getValue() != null && tuple.getScore() != null)
-                .map(tuple -> new AggregatedOrderBookLevel(
-                        new BigDecimal(tuple.getValue()),
-                        tuple.getScore().longValue()
-                ))
-                .toList();
+        List<String> priceList = new ArrayList<>(prices);
+        List<Object> counts = stringRedisTemplate.opsForHash().multiGet(hashKey, new ArrayList<>(priceList));
+        List<AggregatedOrderBookLevel> result = new ArrayList<>();
+        for (int i = 0; i < priceList.size(); i++) {
+            Object count = counts.get(i);
+            if (count != null) {
+                result.add(new AggregatedOrderBookLevel(
+                        new BigDecimal(priceList.get(i)),
+                        Long.parseLong(count.toString())
+                ));
+            }
+        }
+        return result;
     }
 
     @Override
@@ -135,5 +148,9 @@ public class RedisOrderBookServiceImpl implements RedisOrderBookService {
 
     private String getRedisKeyForOrderLevels(Long instrumentId, OrderType orderType) {
         return String.format("orderbook:%d:%s:levels", instrumentId, orderType);
+    }
+
+    private String getRedisKeyForOrderLevelsHash(Long instrumentId, OrderType orderType) {
+        return String.format("orderbook:%d:%s:counts", instrumentId, orderType);
     }
 }
