@@ -1,3 +1,5 @@
 databaseChangeLog:
   - include:
       file: classpath:/db/changelog/changeset/create-instrument-table.sql
+  - include:
+      file: classpath:/db/changelog/changeset/init-instrument-table.sql

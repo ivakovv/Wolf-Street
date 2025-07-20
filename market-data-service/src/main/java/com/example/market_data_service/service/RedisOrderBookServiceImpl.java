@@ -53,7 +53,7 @@ public class RedisOrderBookServiceImpl implements RedisOrderBookService {
     public void addOrderLevel(Long instrumentId, OrderType type, double price, long count) {
         String zsetKey = getRedisKeyForOrderLevels(instrumentId, type);
         String hashKey = getRedisKeyForOrderLevelsHash(instrumentId, type);
-        String priceStr = new BigDecimal(price).toPlainString();
+        String priceStr = String.valueOf(price);
         stringRedisTemplate.opsForHash().increment(hashKey, priceStr, count);
         stringRedisTemplate.opsForZSet().add(zsetKey, priceStr, price);
     }
@@ -62,7 +62,7 @@ public class RedisOrderBookServiceImpl implements RedisOrderBookService {
     public void removeOrderLevel(Long instrumentId, OrderType type, double price, long count) {
         String zsetKey = getRedisKeyForOrderLevels(instrumentId, type);
         String hashKey = getRedisKeyForOrderLevelsHash(instrumentId, type);
-        String priceStr = new BigDecimal(price).toPlainString();
+        String priceStr = String.valueOf(price);
         Long newCount = stringRedisTemplate.opsForHash().increment(hashKey, priceStr, -count);
         if (newCount <= 0) {
             log.info("Removing order book level: {}, instrument: {}, side: {}", price, instrumentId, type);
