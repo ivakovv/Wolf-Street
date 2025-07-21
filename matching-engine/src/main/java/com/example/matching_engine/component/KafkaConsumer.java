@@ -39,7 +39,7 @@ public class KafkaConsumer {
             }
             case ORDER_UPDATED -> {
                 OrderMessages.OrderUpdatedEvent orderUpdatedEvent = event.getOrderUpdated();
-                if (orderUpdatedEvent.getStatus().equals(OrderMessages.OrderStatus.CANCELLED)){
+                if (orderUpdatedEvent.getStatus().equals(OrderMessages.OrderStatus.CANCELLED) || orderUpdatedEvent.getStatus().equals(OrderMessages.OrderStatus.PARTIALLY_CANCELLED)){
                     try{
                         Order cancelledOrder = matchingEngine.cancelOrder(orderUpdatedEvent.getOrderId());
                         kafkaEventService.handleDealCancelledEvent(cancelledOrder);
