@@ -19,6 +19,7 @@ public interface MapperFromEventToDeal {
     @Mapping(target = "instrumentId", source = "instrumentId")
     @Mapping(target = "count", source = "count")
     @Mapping(target = "lotPrice", expression = "java(new BigDecimal(dealExecutedEvent.getLotPrice()))")
+    @Mapping(target = "saleOrderPrice", expression = "java(new BigDecimal(dealExecutedEvent.getSaleOrderPrice()))")
     @Mapping(target = "buyOrderPrice", expression = "java(new BigDecimal(dealExecutedEvent.getBuyOrderPrice()))")
     @Mapping(target = "createdAt", expression = "java(toOffsetDateTime(dealExecutedEvent.getCreatedAt()))")
     Deal mapToDealFromEvent(DealMessages.DealExecutedEvent dealExecutedEvent);

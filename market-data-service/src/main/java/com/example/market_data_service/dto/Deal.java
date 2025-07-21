@@ -10,6 +10,7 @@ public record Deal(Long buyOrderId,
                    Long instrumentId,
                    Long count,
                    BigDecimal lotPrice,
+                   BigDecimal saleOrderPrice,
                    BigDecimal buyOrderPrice,
                    OffsetDateTime createdAt) {
 }

@@ -49,7 +49,7 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
     public void processExecutedDeal(
             Long portfolioBuyId, Long portfolioSaleId, Long instrumentId, Long count, BigDecimal lotPrice, BigDecimal buyOrderPrice) {
         try {
-            processDealForSaleSide(portfolioSaleId, instrumentId, count, buyOrderPrice);
+            processDealForSaleSide(portfolioSaleId, instrumentId, count, lotPrice);
             processDealForBuySide(portfolioBuyId, instrumentId, count, lotPrice, buyOrderPrice);
         } catch (Exception e) {
             log.error("process executed Deal failed: {}", e.getMessage());

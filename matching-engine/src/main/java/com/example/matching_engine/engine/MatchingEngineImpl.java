@@ -97,6 +97,7 @@ public class MatchingEngineImpl implements MatchingEngine {
                 saleOrder.getPortfolioId(),
                 buyOrder.getInstrumentId(),
                 count,
+                price,
                 saleOrder.getLotPrice(),
                 buyOrder.getLotPrice()
         );

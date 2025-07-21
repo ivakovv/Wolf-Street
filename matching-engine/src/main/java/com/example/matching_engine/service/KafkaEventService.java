@@ -34,6 +34,7 @@ public class KafkaEventService {
                 .setSalePortfolioId(deal.salePortfolioId())
                 .setCount(deal.count())
                 .setLotPrice(deal.lotPrice().toString())
+                .setSaleOrderPrice(deal.saleOrderPrice().toString())
                 .setBuyOrderPrice(deal.buyOrderPrice().toString())
                 .setInstrumentId(deal.instrumentId())
                 .setCreatedAt(buildTimestamp(OffsetDateTime.now()))
