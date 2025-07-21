@@ -49,7 +49,7 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
     public void processExecutedDeal(
             Long portfolioBuyId, Long portfolioSaleId, Long instrumentId, Long count, BigDecimal lotPrice, BigDecimal buyOrderPrice) {
         try {
-            processDealForSaleSide(portfolioSaleId, instrumentId, count, lotPrice);
+            processDealForSaleSide(portfolioSaleId, instrumentId, count, buyOrderPrice);
             processDealForBuySide(portfolioBuyId, instrumentId, count, lotPrice, buyOrderPrice);
         } catch (Exception e) {
             log.error("process executed Deal failed: {}", e.getMessage());
@@ -185,6 +185,9 @@ public class PortfolioValidationServiceImpl implements PortfolioValidationServic
     private void updateBlockedCash(Portfolio portfolio, BigDecimal amountChange) {
         PortfolioCash portfolioCash = getCash(portfolio);
         portfolioCash.setBlockedAmount(portfolioCash.getBlockedAmount().add(amountChange));
+        if (portfolioCash.getBlockedAmount().compareTo(BigDecimal.ZERO) < 0){
+            portfolioCash.setBlockedAmount(BigDecimal.ZERO);
+        }
         portfolioCashRepository.save(portfolioCash);
     }
 
